@@ -76,6 +76,8 @@ scCytoTrek is organized into distinct functional modules:
 - **KNN Imputation:** k-NN dropout smoothing before DE testing.
 - **Robust QC & Normalization:** Standard QC wrappers with violin plots.
 
+![QC Violin Plots](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/qc_violins.png)
+
 ### 2. Tools & Analysis (`sccytotrek.tools`)
 - **Custom Doublet Identification:** PCA-density neighborhood doublet detection — no Scrublet dependency.
 - **Dropout-Adjusted DE:** Differential expression corrected for Cellular Detection Rate (CDR).
@@ -84,8 +86,26 @@ scCytoTrek is organized into distinct functional modules:
 - **CellTypist Integration:** `run_celltypist()` — automated cell-type classification using CellTypist pretrained models (`Immune_All_Low.pkl`, etc.) with majority-voting, auto-normalisation, confidence score, and graceful fallback to marker scoring. `plot_celltypist_umap()` renders a 3-panel SeuratExtend figure (type UMAP, confidence UMAP, violin per type).
 - **Clinical Survival Correlation:** Integrate scRNA-seq with patient survival data (Lifelines).
 
+````carousel
+![Doublet Analysis](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/doublet_analysis.png)
+<!-- slide -->
+![Cell Type Assignment](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cell_types.png)
+````
+
 ### 3. Advanced Clustering (`sccytotrek.clustering`)
 - **NMF, K-Means, Agglomerative, Spectral, GMM, DBSCAN** — 6 alternative clustering strategies beyond Leiden/Louvain.
+
+````carousel
+![Leiden (Base)](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/leiden_clusters.png)
+<!-- slide -->
+![K-Means](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/kmeans_clusters.png)
+<!-- slide -->
+![GMM](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/gmm_clusters.png)
+<!-- slide -->
+![DBSCAN](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/dbscan_clusters.png)
+<!-- slide -->
+![Agglomerative](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/agglomerative_clusters.png)
+````
 
 ### 4. Trajectory Inference & Tipping Points (`sccytotrek.trajectory`)
 - **Pseudotime Inference:** DPT, Slingshot, Palantir, CellRank, and Monocle3 wrappers.
@@ -93,6 +113,22 @@ scCytoTrek is organized into distinct functional modules:
 - **Pseudotime Expression Heatmap:** `plot_pseudotime_heatmap()` — smoothed, z-scored, hierarchically clustered heatmap ordered by pseudotime with cluster colour bar and direction-coded gene labels.
 - **Sandpile Tipping Points:** Detect critical-state transitions via network entropy spikes; `plot_tipping_genes()` shows entropy curve + top hub-weight genes.
 - **Trajectory Streamgraphs:** Population flow over pseudotime.
+
+````carousel
+![Pseudotime Comparison](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/trajectory_comparison.png)
+<!-- slide -->
+![Tipping Point Entropy](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/sandpile_entropy_trajectory.png)
+<!-- slide -->
+![Tipping Genes Barplot](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/tipping_genes_barplot.png)
+````
+
+````carousel
+![Pseudotime Comparison](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/trajectory_comparison.png)
+<!-- slide -->
+![Tipping Point Entropy](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/sandpile_entropy_trajectory.png)
+<!-- slide -->
+![Tipping Genes Barplot](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/tipping_genes_barplot.png)
+````
 
 ### 5. Cell-Cell Communication (`sccytotrek.interaction`)
 - **CellPhoneDB-style Scoring:** Non-parametric permutation tests for LR pair significance.
@@ -109,9 +145,17 @@ scCytoTrek is organized into distinct functional modules:
 - **Barcode Dropout Imputation:** RNA-space weighted kNN majority-vote recovery of up to 50% missing barcodes.
 - **Clonal Streamgraph + Barcode Timeline:** `plot_clonal_streamgraph()` now includes a **barcode event timeline panel** — per-clone horizontal spans showing first/last pseudotime appearance with individual cell rug marks, alongside the streamgraph and two UMAP panels.
 
+````carousel
+![Lineage UMAP — Clones & Imputation](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/lineage_imputation_umap.png)
+<!-- slide -->
+![Clone Size Distribution](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/lineage_clone_sizes.png)
+````
+
 ### 7. Gene Regulatory Networks (`sccytotrek.grn`)
 - **TF Enrichment:** Weighted dot-product TF activity scoring, RNA-expression adjusted.
 - **In Silico Knockdown:** Predict cell-state shifts from gene perturbations.
+
+![TF Score Ranking — Heatmap + Bar Chart](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/tf_score_ranking.png)
 
 ### 8. Drug Target Testing (`sccytotrek.interaction`)
 - **`score_drug_targets()`:** Score drug candidates against cell clusters using DrugBank-style target tables. Aggregates mean expression of each drug's target genes per cluster and returns a **Drug × Cluster expression pivot table** for rapid hit prioritisation.
@@ -132,6 +176,12 @@ scCytoTrek is organized into distinct functional modules:
 ![RNA + Methylation Integration](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/multiome_rna_methylation_integration.png)
 <!-- slide -->
 ![RNA + Protein Integration](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/multiome_rna_protein_integration.png)
+<!-- slide -->
+![Bulk RNA Alignment](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/bulk_alignment.png)
+<!-- slide -->
+![Cross-Species Venn Diagram](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cross_species_venn.png)
+<!-- slide -->
+![Joint t-SNE (CCA-aligned)](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cross_species_umap.png)
 ````
 
 ### 11. Unified SeuratExtend Aesthetics (`sccytotrek.plotting`)
