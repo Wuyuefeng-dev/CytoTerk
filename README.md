@@ -173,74 +173,106 @@ Rather than manual curation, `ct.tools.score_cell_types` cross-references a dict
 Differentiation is rarely instantaneous. Trajectories establish macroscopic cell maturity indices (pseudotime) away from assigned progenitor roots.
 
 ### Method Comparison
-`scCytoTrek` natively bridges assumptions from **Slingshot** (Principal Curves), **Palantir** (Markov Shortest Path), and **CellRank** (Velocity Flows) to map differentiation alongside baseline **Monocle3** networks.
+`scCytoTrek` bridges **Slingshot** (Principal Curves), **Palantir** (Markov Shortest Path), and **CellRank** (Velocity Flows) alongside baseline **Monocle3** networks.
 
 | Model Comparisons | Monocle3 Principal Graph |
 | :---: | :---: |
 | ![Comparisons](demo_figs/trajectory_comparison.png) | ![Monocle3](demo_figs/trajectory_monocle3.png) |
 
-### Visualizing Timeline Shifts (Streamgraphs)
-To rapidly interpret density changes as time progresses: `ct.trajectory.plot_streamgraph` smoothens population variance along the computed chronological axis.
-![Dynamic Population Streamgraph](demo_figs/trajectory_streamgraph.png)
-
 ### Tipping Point Calculation (Sandpile Model)
-Using `ct.trajectory.compute_sandpile_entropy`, the timeline is discretely binned, dynamically tracking global network variability. A spike in non-linear "regulatory entropy" flags critical transitional tipping points preceding differentiation splits that cannot be visually recovered from a UMAP trace.
+`ct.trajectory.compute_sandpile_entropy` bins the timeline, tracking global network entropy. A spike flags critical transitional tipping points preceding differentiation splits. `plot_tipping_point_umap` overlays per-cell entropy on UMAP.
 
-| Entropy Trajectory | Top Genes Driving Instability |
-| :---: | :---: |
-| ![Entropy](demo_figs/sandpile_entropy_trajectory.png) | ![Instability](demo_figs/tipping_genes_barplot.png) |
+| Entropy Trajectory + Top Driving Genes |
+| :---: |
+| ![Tipping Genes](demo_figs/tipping_genes_barplot.png) |
 
 ---
 
 ## 5. Extracellular Communication (`sccytotrek.interaction`)
 
-### Ligand-Receptor Scoring
-Rather than relying on closed-source databases, `ct.interaction.run_cellphonedb_scoring` uses customized non-parametric label permutations identifying cross-cluster protein-protein signals.
+`ct.interaction.run_cellphonedb_scoring` uses non-parametric label permutations to identify cross-cluster ligand-receptor signals. `ct.interaction.plot_cell2cell_dotplot` condenses millions of connections into a targeted dot-plot.
 
-### Interaction Mapping
-`ct.interaction.plot_cell2cell_dotplot` condenses millions of connections into targeted, mathematically sound receptor networks. Size indicates reliability; color corresponds to the product strength.
 ![Receptor Crosslinking Grid](demo_figs/cell2cell_interaction.png)
 
 ---
 
-## 6. Multi-omics Architecture (`sccytotrek.multiome`)
+## 6. Multi-Omics Integration (`sccytotrek.multiome`)
 
-To natively resolve modern `10x Multiome` assays, standard transcriptomic matrices must be rigidly pinned against `scATAC-seq` epigenetic peaks.
+Five integration methods benchmarked across **RNA+ATAC**, **RNA+Methylation**, and **RNA+Protein** datasets, all including simulated batch effects:
 
-Implemented Integration Arrays acting heavily upon structured `mudata` inputs:
-1. **Weighted Nearest Neighbors (WNN)**: Reconciles independent distance boundaries.
-2. **Canonical Correlation (CCA)**: Selects sub-vectors correlating both input assays.
-3. **Procrustes Alignment**: Performs mathematical affine geometry rotation to mirror RNA over ATAC.
-4. **SNF** & **Concatenated PCA** & **Joint Harmony**.
+| Method | Strategy | Quality Metric |
+|---|---|---|
+| **WNN** | Per-cell modality weighting by local density | Silhouette + Batch LISI |
+| **CCA** | Maximally correlated joint projections | Silhouette + Batch LISI |
+| **ConcatPCA** | L2-normalize → concatenate → joint PCA | — |
+| **Procrustes** | Geometric rotation of mod2 onto RNA space | — |
+| **SNF** | Iterative kNN affinity graph fusion | Silhouette + Batch LISI |
 
-![6-Way Multiome Model Outputs](demo_figs/multiome_umaps.png)
+Run: `PYTHONPATH=src python demo_multiome_integration.py`
 
 ---
 
-## 7. Lineage Tracing & Barcode Imputation (`sccytotrek.lineage`)
+## 7. Bulk RNA Alignment (`sccytotrek.integration.bulk`)
 
-Each simulated cell carries an RNA expression profile and a unique lineage barcode, but **50% of barcodes are missing** (dropout). The `ct.lineage.impute_barcodes_knn` algorithm recovers missing barcodes using RNA-space weighted kNN majority voting on PCA embeddings.
+`project_bulk_to_umap` uses **true PCA-loading projection** (not a mock) to embed bulk RNA-seq samples into the single-cell reference space. `plot_bulk_alignment` generates a **SeuratExtend-style 4-panel figure**:
+
+- **A** — SC embedding (t-SNE) coloured by cluster, bulk samples overlaid as ★ stars  
+- **B** — Per-sample pie charts of nearest-neighbour cluster composition  
+- **C** — Bulk × SC cluster Pearson correlation heatmap  
+- **D** — Top variable gene dot plot (size = % expressing, colour = normalised mean)
+
+![Bulk RNA Alignment — SeuratExtend-style](demo_figs/bulk_alignment.png)
+
+Run: `PYTHONPATH=src python demo_bulk_alignment.py`
+
+---
+
+## 8. Cross-Species Alignment (`sccytotrek.integration.species`)
+
+Full **Human ↔ Mouse ↔ Rat** pipeline: mock ortholog table → 1:1 gene conversion → CCA joint embedding → t-SNE visualization.
+
+**Demo result:** 1200 shared ortholog genes retained across 3 species (from 1550 / 1480 / 1410 total).
+
+### Gene Overlap Venn Diagram
+Five-panel figure showing: overlapping circles, Jaccard similarity bar chart, conservation score distribution, and shared vs species-unique stacked bars.
+
+![Cross-Species Venn Diagram](demo_figs/cross_species_venn.png)
+
+### Joint t-SNE After CCA Alignment
+Three-panel: by species, by cell cluster, UMAP-1 violin distribution per species.
+
+![Cross-Species Joint t-SNE](demo_figs/cross_species_umap.png)
+
+Run: `PYTHONPATH=src python demo_cross_species.py`
+
+---
+
+## 9. TF Enrichment & GRN (`sccytotrek.grn`)
+
+`run_tf_enrichment` scores transcription factor activity via a weighted dot-product across a TF–target network (no heavy external dependencies). Activity is scaled by each TF's actual RNA expression level.
+
+**Output:** per-cell TF activity matrix in `adata.obsm['X_tf_activity']`.
+
+| TF Activity Heatmap (Cluster × TF) + Global Ranking |
+| :---: |
+| ![TF Score Ranking](demo_figs/tf_score_ranking.png) |
+
+---
+
+## 10. Lineage Tracing & Barcode Imputation (`sccytotrek.lineage`)
+
+Each cell carries a lineage barcode, but **50% are missing** (dropout). `ct.lineage.impute_barcodes_knn` recovers them using RNA-space weighted kNN majority voting in PCA embeddings.
 
 | Step | Detail |
 |---|---|
-| Data Simulation | `make_mock_scrna` creates `clone_A{cluster}` barcodes; 50% randomly dropped to `"NA"` |
-| Imputation | kNN classifier in PCA space; majority vote by distance-weighted neighbors |
-| Confidence | Per-cell max posterior probability stored in `barcode_imputation_confidence` |
-| Visualization | Side-by-side UMAP: clone identity + imputation status (original vs imputed) |
+| Simulation | `make_mock_scrna` creates `clone_A{cluster}` barcodes; 50% dropped to `"NA"` |
+| Imputation | kNN in PCA space; majority-vote by distance-weighted neighbours |
+| Confidence | Per-cell max posterior stored in `barcode_imputation_confidence` |
+| Clonal dynamics | `plot_clonal_streamgraph` shows clone proportions along pseudotime |
 
 | Lineage UMAP | Clone Size Distribution |
 | :---: | :---: |
 | ![Lineage UMAP](demo_figs/lineage_imputation_umap.png) | ![Clone Sizes](demo_figs/lineage_clone_sizes.png) |
-
----
-
-## 8. Enrichment and Mapping Features
-
-- **scVI Deep Learning Integration** (`run_scvi_integration`): Variational Encoders extracting robust underlying latent traits immune to sequencing lane disruptions.
-- **Cross-Species Alignment** (`map_human_mouse_orthologs`): Bridging mouse experimental datasets against clinical human cohorts via hardcoded Ensembl relationships. 
-- **Bulk Alignment Visualization**: Leveraging UMAP's `.transform()` behavior to drop Bulk-RNA tissues neatly into the underlying single-cell visual reference map.
-- **TF Enrichment**: `run_tf_enrichment` establishes pseudo bulk dependencies without importing resource-intensive secondary libraries. It scores network edge weights directly over single-cell RNA transcript inputs.
-![TF Enrichment Module](demo_figs/tf_enrichment_umap.png)
 
 ---
 
