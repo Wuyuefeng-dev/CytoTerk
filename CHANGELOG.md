@@ -27,6 +27,7 @@
 | File | Change |
 |------|--------|
 | `generate_walkthrough_figs.py` | Fully rewritten with SeuratExtend style; fixed `IndexError` in `bulk_colors` |
+| `demo_cci_arcs.py` | Added mock script to generate Cell-Cell Interaction UMAP Arcs |
 
 ### Figures Generated (SeuratExtend style)
 | Figure | Path |
@@ -34,9 +35,12 @@
 | Bulk RNA Alignment | `demo_figs/bulk_alignment.png` |
 | Tipping Genes Barplot | `demo_figs/tipping_genes_barplot.png` |
 | TF Score Ranking | `demo_figs/tf_score_ranking.png` |
+| CCI UMAP Arcs | `demo_figs/cci_umap_arcs.png` |
 
 ### Documentation
 | File | Change |
 |------|--------|
-| `README.md` | Key-features section rewritten — 11 modules with all new features |
-| `walkthrough.md` | Sections 11–15 added: pseudotime heatmap, CCI arc plot, barcode timeline, CellTypist, drug target testing |
+| `README.md` | Key-features section rewritten (11 modules); architecture flowchart diagram added; embedded CCI UMAP Arcs |
+| `walkthrough.md` | Sections 11–15 added including pseudotime heatmap, CCI arc plot, barcode timeline, CellTypist; embedded CCI UMAP Arcs |
+
+---
