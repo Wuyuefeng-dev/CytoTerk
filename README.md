@@ -1,8 +1,11 @@
 # scCytoTrek 🚀
 
-**scCytoTrek** is a comprehensive, scalable, and multi-functional Python package specifically designed for advanced single-cell and multi-omic data analysis. Built on top of `anndata` and `scanpy`, scCytoTrek minimizes external dependencies by providing custom, tailored algorithms for a wide variety of analytical workflows.
+**scCytoTrek** is a **vibe-coding–based** scRNA-seq analysis framework built for the purpose of testing LLM-assisted bioinformatics analysis. It aims to provide a comprehensive, scalable, and multi-functional Python package specifically designed for advanced single-cell and multi-omic data workflows. Built on top of `anndata` and `scanpy`, scCytoTrek minimises external dependencies by providing custom, tailored algorithms for a wide variety of analytical tasks.
 
-It is designed to give researchers deep insights into cellular heterogeneity, trajectory dynamics, cell-cell communication, and regulatory networks.
+Designed to give researchers deep insights into cellular heterogeneity, trajectory dynamics, cell-cell communication, and regulatory networks — all through natural-language-driven development.
+
+> 💡 **We welcome additional vibe-coded contributions to this package!**  
+> For questions, suggestions, or collaborations, contact: **wuyuefeng@westlake.edu.cn**
 
 ---
 
