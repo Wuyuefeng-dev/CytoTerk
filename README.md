@@ -55,9 +55,9 @@ scCytoTrek is organized into distinct functional modules:
 
 ### 9. Multi-modal Integration (`sccytotrek.integration` & `sccytotrek.multiome`)
 - **scVI Deep Learning Integration:** Perform batch integration and complex latent sub-clustering using state-of-the-art variational autoencoders.
-- **Cross-Species Mapping:** Map Human and Mouse gene orthologs directly on the AnnData object.
-- **Bulk projection:** Project sorted Bulk RNA-seq samples directly into the single-cell expression embedding.
-- **RNA+ATAC Joint Integration:** Complete 6-algorithm suite for multi-omics structural mapping, including **WNN**, **CCA**, **Concatenated PCA**, **Procrustes Alignment**, **Similarity Network Fusion (SNF)**, and **Joint Harmony**.
+- **Cross-Species Alignment:** Full Human ↔ Mouse ↔ Rat pipeline with mock ortholog table generator, 5-panel **Venn diagram** of gene overlaps (Jaccard similarity, conservation scores), and CCA-based joint t-SNE visualization. Run `demo_cross_species.py`.
+- **Bulk RNA Projection (SeuratExtend-style):** Project bulk RNA-seq samples into the SC UMAP via true PCA-loading projection. Generates a 4-panel figure: SC UMAP + bulk star overlay, per-sample cluster composition pie charts, bulk×cluster Pearson heatmap, and marker gene dot plot. Run `demo_bulk_alignment.py`.
+- **Multi-Omics Integration (5 methods, 3 dataset types):** Benchmarks WNN, CCA, ConcatPCA, Procrustes, and SNF on RNA+ATAC, RNA+Methylation, and RNA+Protein datasets with Silhouette and Batch LISI quality metrics. Run `demo_multiome_integration.py`.
 
 ---
 
