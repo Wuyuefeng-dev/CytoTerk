@@ -76,8 +76,6 @@ scCytoTrek is organized into distinct functional modules:
 - **KNN Imputation:** k-NN dropout smoothing before DE testing.
 - **Robust QC & Normalization:** Standard QC wrappers with violin plots.
 
-![QC Violin Plots](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/qc_violins.png)
-
 ### 2. Tools & Analysis (`sccytotrek.tools`)
 - **Custom Doublet Identification:** PCA-density neighborhood doublet detection — no Scrublet dependency.
 - **Dropout-Adjusted DE:** Differential expression corrected for Cellular Detection Rate (CDR).
@@ -85,12 +83,6 @@ scCytoTrek is organized into distinct functional modules:
 - **Cell Type Scoring:** Cluster-level scoring against user-supplied marker dictionaries.
 - **CellTypist Integration:** `run_celltypist()` — automated cell-type classification using CellTypist pretrained models (`Immune_All_Low.pkl`, etc.) with majority-voting, auto-normalisation, confidence score, and graceful fallback to marker scoring. `plot_celltypist_umap()` renders a 3-panel SeuratExtend figure (type UMAP, confidence UMAP, violin per type).
 - **Clinical Survival Correlation:** Integrate scRNA-seq with patient survival data (Lifelines).
-
-````carousel
-![Doublet Analysis](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/doublet_analysis.png)
-<!-- slide -->
-![Cell Type Assignment](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cell_types.png)
-````
 
 ### 3. Advanced Clustering (`sccytotrek.clustering`)
 - **NMF, K-Means, Agglomerative, Spectral, GMM, DBSCAN** — 6 alternative clustering strategies beyond Leiden/Louvain.
@@ -135,21 +127,9 @@ scCytoTrek is organized into distinct functional modules:
 - **Dot Plot Visualisation:** Sending/receiving populations vs interaction strength.
 - **UMAP Arc Plot:** `plot_cell2cell_umap()` — Bézier arcs between cluster centroids on the UMAP; arc width = interaction strength, colour = sender cluster, arrowhead = receiver direction. Includes a strength scale-bar inset.
 
-````carousel
-![Cell-Cell Interaction Dotplot](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cell2cell_interaction.png)
-<!-- slide -->
-![Cell-Cell Interaction UMAP Arcs](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cci_umap_arcs.png)
-````
-
 ### 6. Lineage Tracing (`sccytotrek.lineage`)
 - **Barcode Dropout Imputation:** RNA-space weighted kNN majority-vote recovery of up to 50% missing barcodes.
 - **Clonal Streamgraph + Barcode Timeline:** `plot_clonal_streamgraph()` now includes a **barcode event timeline panel** — per-clone horizontal spans showing first/last pseudotime appearance with individual cell rug marks, alongside the streamgraph and two UMAP panels.
-
-````carousel
-![Lineage UMAP — Clones & Imputation](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/lineage_imputation_umap.png)
-<!-- slide -->
-![Clone Size Distribution](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/lineage_clone_sizes.png)
-````
 
 ### 7. Gene Regulatory Networks (`sccytotrek.grn`)
 - **TF Enrichment:** Weighted dot-product TF activity scoring, RNA-expression adjusted.
@@ -169,20 +149,6 @@ scCytoTrek is organized into distinct functional modules:
 - **Cross-Species Alignment:** Human ↔ Mouse ↔ Rat ortholog conversion → CCA → joint t-SNE.
 - **Bulk RNA Projection:** SeuratExtend-style 4-panel figure (t-SNE + stars, pie charts, heatmap, dot plot).
 - **Multi-Omics Integration (5 methods):** Benchmarks WNN, CCA, ConcatPCA, Procrustes, and SNF on RNA+ATAC, RNA+Methylation, and RNA+Protein datasets with Silhouette and Batch LISI quality metrics. Run `demo_multiome_integration.py`.
-
-````carousel
-![RNA + ATAC Integration](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/multiome_rna_atac_integration.png)
-<!-- slide -->
-![RNA + Methylation Integration](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/multiome_rna_methylation_integration.png)
-<!-- slide -->
-![RNA + Protein Integration](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/multiome_rna_protein_integration.png)
-<!-- slide -->
-![Bulk RNA Alignment](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/bulk_alignment.png)
-<!-- slide -->
-![Cross-Species Venn Diagram](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cross_species_venn.png)
-<!-- slide -->
-![Joint t-SNE (CCA-aligned)](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cross_species_umap.png)
-````
 
 ### 11. Unified SeuratExtend Aesthetics (`sccytotrek.plotting`)
 - **`apply_seurat_theme(ax)`** — whitegrid, NPG discrete palette, no top/right spines.
