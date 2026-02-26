@@ -17,6 +17,7 @@ from . import trajectory
 from . import multiome
 from . import interaction
 from . import pathway
+from . import lineage
 
 __all__ = [
     "pp", 
@@ -31,5 +32,6 @@ __all__ = [
     "trajectory", 
     "multiome",
     "interaction",
-    "pathway"
+    "pathway",
+    "lineage"
 ]
