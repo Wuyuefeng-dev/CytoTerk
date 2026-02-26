@@ -36,9 +36,24 @@ import scanpy as sc
 
 def _preprocess_rna(adata: AnnData, n_pcs: int = 30) -> np.ndarray:
     """Normalize → log1p → HVG → PCA. Returns X_pca stored in adata.obsm."""
+    # Clip negative values introduced by batch-effect simulation
+    if sp.issparse(adata.X):
+        adata.X.data = np.clip(adata.X.data, 0, None)
+    else:
+        adata.X = np.clip(adata.X, 0, None)
+    # Filter lowly expressed genes
+    sc.pp.filter_genes(adata, min_cells=5)
+    sc.pp.filter_cells(adata, min_genes=10)
     sc.pp.normalize_total(adata, target_sum=1e4)
     sc.pp.log1p(adata)
-    sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.3)
+    try:
+        sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.3)
+        use_hvg = adata.var['highly_variable'].sum() > 50
+    except Exception:
+        use_hvg = False
+    if not use_hvg:
+        adata.var['highly_variable'] = True   # fall back to all genes
+    n_pcs = min(n_pcs, adata.n_obs - 1, adata.n_vars - 1)
     sc.pp.pca(adata, n_comps=n_pcs)
     return adata.obsm["X_pca"]
 
