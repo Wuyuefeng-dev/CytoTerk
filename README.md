@@ -123,11 +123,11 @@ Pre-processing requires robust visualization of total UMIs (`total_counts`) and 
 ![QC Violin Plots](demo_figs/qc_violins.png)
 
 ### Custom Doublet Detection
-`ct.tools.identify_doublets` simulates artificial cross-cluster droplets to build a density-aware kNN graph identifying potential dual-cell captures. Below is the un-filtered overlap space versus the cleaned manifold.
+`ct.tools.identify_doublets` simulates artificial cross-cluster droplets to build a density-aware kNN graph identifying potential dual-cell captures. `ct.tl.doublet_statistical_summary` provides statistical breakdown; `ct.tl.plot_doublet_scores` renders a 6-panel figure showing continuous UMAP scores, binary classification, score histogram, CDF, and a stats table.
 
-| Before Doublet Removing | Cleaned Dataset |
-| :---: | :---: |
-| ![Before Doublet Removing](demo_figs/doublets_before.png) | ![Cleaned Dataset](demo_figs/doublets_after.png) |
+> **Demo result:** 146 doublets detected (7.3%) of 2,000 simulated cells at threshold ≥ 0.15
+
+![Doublet Analysis](demo_figs/doublet_analysis.png)
 
 ---
 
@@ -217,9 +217,20 @@ Implemented Integration Arrays acting heavily upon structured `mudata` inputs:
 
 ---
 
-## 7. Lineage Tracing & Imputation (`sccytotrek.lineage`)
+## 7. Lineage Tracing & Barcode Imputation (`sccytotrek.lineage`)
 
-Allows users to simulate, benchmark, and impute complex lineage tracing assays where a significant percentage of cellular barcodes fail to capture correctly but the underlying cellular transcriptomes are preserved. **Impute missing cells based on topological RNA similarities.**
+Each simulated cell carries an RNA expression profile and a unique lineage barcode, but **50% of barcodes are missing** (dropout). The `ct.lineage.impute_barcodes_knn` algorithm recovers missing barcodes using RNA-space weighted kNN majority voting on PCA embeddings.
+
+| Step | Detail |
+|---|---|
+| Data Simulation | `make_mock_scrna` creates `clone_A{cluster}` barcodes; 50% randomly dropped to `"NA"` |
+| Imputation | kNN classifier in PCA space; majority vote by distance-weighted neighbors |
+| Confidence | Per-cell max posterior probability stored in `barcode_imputation_confidence` |
+| Visualization | Side-by-side UMAP: clone identity + imputation status (original vs imputed) |
+
+| Lineage UMAP | Clone Size Distribution |
+| :---: | :---: |
+| ![Lineage UMAP](demo_figs/lineage_imputation_umap.png) | ![Clone Sizes](demo_figs/lineage_clone_sizes.png) |
 
 ---
 
