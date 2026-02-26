@@ -162,46 +162,42 @@ def plot_doublet_scores(
     is_doublet = adata.obs['predicted_doublet'].values
     umap_coords = adata.obsm[use_rep]
 
-    fig = plt.figure(figsize=(18, 12))
-    fig.patch.set_facecolor('#0e0e0e')
+    fig = plt.figure(figsize=(18, 12), facecolor='white')
 
     # --- Panel 1: Continuous doublet score on UMAP ---
     ax1 = fig.add_subplot(2, 3, 1)
-    ax1.set_facecolor('#0e0e0e')
+    ax1.set_facecolor('white')
     sc1 = ax1.scatter(
         umap_coords[:, 0], umap_coords[:, 1],
-        c=scores, cmap='plasma', s=4, alpha=0.7, rasterized=True
+        c=scores, cmap='YlOrRd', s=4, alpha=0.7, rasterized=True
     )
     fig.colorbar(sc1, ax=ax1, label='Doublet Score', fraction=0.046, pad=0.04)
-    ax1.set_title('Doublet Score (Continuous)', color='white', fontsize=12, fontweight='bold')
-    ax1.set_xlabel('UMAP 1', color='white'); ax1.set_ylabel('UMAP 2', color='white')
-    ax1.tick_params(colors='white'); [s.set_color('white') for s in ax1.spines.values()]
+    ax1.set_title('Doublet Score (Continuous)', fontsize=12, fontweight='bold')
+    ax1.set_xlabel('UMAP 1'); ax1.set_ylabel('UMAP 2')
 
     # --- Panel 2: Binary predicted doublets on UMAP ---
     ax2 = fig.add_subplot(2, 3, 2)
-    ax2.set_facecolor('#0e0e0e')
-    colors_binary = ['#444466' if not d else '#ff4444' for d in is_doublet]
+    ax2.set_facecolor('white')
+    colors_binary = ['#ccccdd' if not d else '#d62728' for d in is_doublet]
     ax2.scatter(umap_coords[:, 0], umap_coords[:, 1], c=colors_binary, s=4, alpha=0.7, rasterized=True)
     from matplotlib.patches import Patch
-    legend_els = [Patch(fc='#444466', label='Singlet'), Patch(fc='#ff4444', label='Doublet')]
-    ax2.legend(handles=legend_els, loc='upper right', framealpha=0.3, labelcolor='white')
-    ax2.set_title('Predicted Doublets', color='white', fontsize=12, fontweight='bold')
-    ax2.set_xlabel('UMAP 1', color='white'); ax2.set_ylabel('UMAP 2', color='white')
-    ax2.tick_params(colors='white'); [s.set_color('white') for s in ax2.spines.values()]
+    legend_els = [Patch(fc='#ccccdd', label='Singlet'), Patch(fc='#d62728', label='Doublet')]
+    ax2.legend(handles=legend_els, loc='upper right', framealpha=0.8)
+    ax2.set_title('Predicted Doublets', fontsize=12, fontweight='bold')
+    ax2.set_xlabel('UMAP 1'); ax2.set_ylabel('UMAP 2')
 
     # --- Panel 3: Score histogram ---
     ax3 = fig.add_subplot(2, 3, 3)
-    ax3.set_facecolor('#1a1a2e')
-    ax3.hist(scores[~is_doublet], bins=50, alpha=0.75, color='#4fc3f7', label='Singlet', density=True)
-    ax3.hist(scores[is_doublet], bins=50, alpha=0.75, color='#ff4444', label='Doublet', density=True)
+    ax3.set_facecolor('#f7f7f7')
+    ax3.hist(scores[~is_doublet], bins=50, alpha=0.75, color='#4292c6', label='Singlet', density=True)
+    ax3.hist(scores[is_doublet],  bins=50, alpha=0.75, color='#d62728', label='Doublet', density=True)
     if is_doublet.sum() > 0:
         threshold = np.min(scores[is_doublet])
-        ax3.axvline(threshold, color='gold', linestyle='--', lw=1.5, label=f'Threshold={threshold:.3f}')
-    ax3.set_title('Score Distribution', color='white', fontsize=12, fontweight='bold')
-    ax3.set_xlabel('Doublet Score', color='white'); ax3.set_ylabel('Density', color='white')
-    ax3.legend(framealpha=0.3, labelcolor='white')
-    ax3.tick_params(colors='white'); [s.set_color('white') for s in ax3.spines.values()]
-    ax3.set_facecolor('#1a1a2e')
+        ax3.axvline(threshold, color='#e6a817', linestyle='--', lw=1.5, label=f'Threshold={threshold:.3f}')
+    ax3.set_title('Score Distribution', fontsize=12, fontweight='bold')
+    ax3.set_xlabel('Doublet Score'); ax3.set_ylabel('Density')
+    ax3.legend()
+
 
     # --- Panel 4: Stats summary table ---
     ax4 = fig.add_subplot(2, 3, 4)
