@@ -120,14 +120,14 @@ The initial steps heavily refine the raw count matrices.
 
 ### Quality Control (QC) Distribution
 Pre-processing requires robust visualization of total UMIs (`total_counts`) and detected genes (`n_genes_by_counts`) to trim low-quality cells or empty droplets effectively.
-![QC Violin Plots](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/qc_violins.png)
+![QC Violin Plots](demo_figs/qc_violins.png)
 
 ### Custom Doublet Detection
 `ct.tools.identify_doublets` simulates artificial cross-cluster droplets to build a density-aware kNN graph identifying potential dual-cell captures. Below is the un-filtered overlap space versus the cleaned manifold.
 
 | Before Doublet Removing | Cleaned Dataset |
 | :---: | :---: |
-| ![Before Doublet Removing](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/doublets_before.png) | ![Cleaned Dataset](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/doublets_after.png) |
+| ![Before Doublet Removing](demo_figs/doublets_before.png) | ![Cleaned Dataset](demo_figs/doublets_after.png) |
 
 ---
 
@@ -139,18 +139,18 @@ Standard pipelines default to **Leiden algorithms**. However, `scCytoTrek` empow
 
 | Leiden (Base) | Louvain Algorithm |
 | :---: | :---: |
-| ![Leiden](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/leiden_clusters.png) | ![Louvain](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/louvain_clusters.png) |
+| ![Leiden](demo_figs/leiden_clusters.png) | ![Louvain](demo_figs/louvain_clusters.png) |
 
 ### Specialized Clustering Methods
 If discrete separation is fuzzy, standard methods fail. Here, alternative implementations highlight the geometry:
 
 | K-Means (Fast) | GMM (Probabilistic) | Spectral (Topographic) |
 | :---: | :---: | :---: |
-| ![K-Means](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/kmeans_clusters.png) | ![GMM](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/gmm_clusters.png) | ![Spectral](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/spectral_clusters.png) |
+| ![K-Means](demo_figs/kmeans_clusters.png) | ![GMM](demo_figs/gmm_clusters.png) | ![Spectral](demo_figs/spectral_clusters.png) |
 
 | DBSCAN (Noise Filter) | Agglomerative (Hierarchical) |
 | :---: | :---: |
-| ![DBSCAN](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/dbscan_clusters.png) | ![Agglomerative](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/agglomerative_clusters.png) |
+| ![DBSCAN](demo_figs/dbscan_clusters.png) | ![Agglomerative](demo_figs/agglomerative_clusters.png) |
 
 > [!NOTE]
 > We also implement Non-Negative Matrix Factorization (NMF) via `ct.clustering.run_nmf` to identify co-varying continuous meta-gene programs rather than discrete cellular blobs.
@@ -161,7 +161,7 @@ If discrete separation is fuzzy, standard methods fail. Here, alternative implem
 
 ### Automated Type Assignment
 Rather than manual curation, `ct.tools.score_cell_types` cross-references a dictionary of known marker profiles against normalized cellular arrays.
-![Inferred Cellular Typology](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/cell_types.png)
+![Inferred Cellular Typology](demo_figs/cell_types.png)
 
 ### Dropout-Adjusted DE Analysis
 `ct.tools.run_differential_expression` uses a unique Cellular Detection Rate (CDR) linear model to isolate biological signals strictly away from capture-specific sequencer biases.
@@ -177,18 +177,18 @@ Differentiation is rarely instantaneous. Trajectories establish macroscopic cell
 
 | Model Comparisons | Monocle3 Principal Graph |
 | :---: | :---: |
-| ![Comparisons](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/trajectory_comparison.png) | ![Monocle3](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/trajectory_monocle3.png) |
+| ![Comparisons](demo_figs/trajectory_comparison.png) | ![Monocle3](demo_figs/trajectory_monocle3.png) |
 
 ### Visualizing Timeline Shifts (Streamgraphs)
 To rapidly interpret density changes as time progresses: `ct.trajectory.plot_streamgraph` smoothens population variance along the computed chronological axis.
-![Dynamic Population Streamgraph](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/trajectory_streamgraph.png)
+![Dynamic Population Streamgraph](demo_figs/trajectory_streamgraph.png)
 
 ### Tipping Point Calculation (Sandpile Model)
 Using `ct.trajectory.compute_sandpile_entropy`, the timeline is discretely binned, dynamically tracking global network variability. A spike in non-linear "regulatory entropy" flags critical transitional tipping points preceding differentiation splits that cannot be visually recovered from a UMAP trace.
 
 | Entropy Trajectory | Top Genes Driving Instability |
 | :---: | :---: |
-| ![Entropy](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/sandpile_entropy_trajectory.png) | ![Instability](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/tipping_genes_barplot.png) |
+| ![Entropy](demo_figs/sandpile_entropy_trajectory.png) | ![Instability](demo_figs/tipping_genes_barplot.png) |
 
 ---
 
@@ -199,7 +199,7 @@ Rather than relying on closed-source databases, `ct.interaction.run_cellphonedb_
 
 ### Interaction Mapping
 `ct.interaction.plot_cell2cell_dotplot` condenses millions of connections into targeted, mathematically sound receptor networks. Size indicates reliability; color corresponds to the product strength.
-![Receptor Crosslinking Grid](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/cell2cell_interaction.png)
+![Receptor Crosslinking Grid](demo_figs/cell2cell_interaction.png)
 
 ---
 
@@ -213,7 +213,7 @@ Implemented Integration Arrays acting heavily upon structured `mudata` inputs:
 3. **Procrustes Alignment**: Performs mathematical affine geometry rotation to mirror RNA over ATAC.
 4. **SNF** & **Concatenated PCA** & **Joint Harmony**.
 
-![6-Way Multiome Model Outputs](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/multiome_umaps.png)
+![6-Way Multiome Model Outputs](demo_figs/multiome_umaps.png)
 
 ---
 
@@ -229,7 +229,7 @@ Allows users to simulate, benchmark, and impute complex lineage tracing assays w
 - **Cross-Species Alignment** (`map_human_mouse_orthologs`): Bridging mouse experimental datasets against clinical human cohorts via hardcoded Ensembl relationships. 
 - **Bulk Alignment Visualization**: Leveraging UMAP's `.transform()` behavior to drop Bulk-RNA tissues neatly into the underlying single-cell visual reference map.
 - **TF Enrichment**: `run_tf_enrichment` establishes pseudo bulk dependencies without importing resource-intensive secondary libraries. It scores network edge weights directly over single-cell RNA transcript inputs.
-![TF Enrichment Module](https://raw.githubusercontent.com/Wuyuefeng-dev/CytoTerk/main/demo_figs/tf_enrichment_umap.png)
+![TF Enrichment Module](demo_figs/tf_enrichment_umap.png)
 
 ---
 
