@@ -168,6 +168,7 @@ def make_mock_multiome(
             X_rna = np.hstack([X_rna, noise])
             
         X_rna = X_rna / X_rna.sum(axis=1, keepdims=True) * np.random.normal(5000, 1000, size=(cells_per_batch, 1))
+        X_rna = np.asarray(X_rna)
         X_rna[X_rna < 0] = 0.1
         batch_rna_X = np.random.poisson(X_rna).astype(np.float32)
         all_rna_X.append(batch_rna_X)
@@ -182,6 +183,7 @@ def make_mock_multiome(
             X_atac = np.hstack([X_atac + shift_matrix, noise_atac])
             
         # Sparsify ATAC
+        X_atac = np.asarray(X_atac)
         X_atac[X_atac < np.percentile(X_atac, 85)] = 0
         X_atac = X_atac / (X_atac.sum(axis=1, keepdims=True) + 1e-6) * np.random.normal(10000, 2000, size=(cells_per_batch, 1))
         batch_atac_X = np.random.poisson(X_atac).astype(np.float32)
@@ -194,15 +196,6 @@ def make_mock_multiome(
     atac_X = np.vstack(all_atac_X)
     y = np.array(all_y)
     n_cells_actual = rna_X.shape[0]
-    
-    # 2. Complete RNA feature space
-    if n_genes > n_informative:
-        noise = np.random.lognormal(mean=0.5, sigma=0.5, size=(n_cells, n_genes - n_informative))
-        X = np.hstack([X, noise])
-        
-    X = X / X.sum(axis=1, keepdims=True) * np.random.normal(5000, 1000, size=(n_cells, 1))
-    X[X < 0] = 0.1
-    rna_X = np.random.poisson(X).astype(np.float32)
     
     # 3. Gene names
     real_genes = [
@@ -233,17 +226,31 @@ def make_mock_multiome(
             gene_names.append(new_gene)
             
     # 4. Create RNA AnnData
-    rna_obs = {"cell_id": [f"cell_{i}" for i in range(n_cells)], "true_cluster": [str(c) for c in y]}
+    rna_obs = {
+        "cell_id": [f"multi_cell_{i}" for i in range(n_cells_actual)], 
+        "true_cluster": [str(c) for c in y],
+        "batch": batch_labels
+    }
     rna_var = {"gene_id": gene_names}
     rna_adata = ad.AnnData(X=rna_X, obs=pd.DataFrame(rna_obs), var=pd.DataFrame(rna_var))
     rna_adata.obs_names = rna_adata.obs["cell_id"]
     rna_adata.var_names = rna_adata.var["gene_id"]
     
     # 5. ATAC
-    # For ATAC, just generate noise directly (minimal linkage for demo)
-    atac_X = np.random.poisson(lam=0.5, size=(n_cells, n_peaks)).astype(np.float32)
-    atac_obs = {"cell_id": [f"cell_{i}" for i in range(n_cells)], "true_cluster": [str(c) for c in y]}
-    atac_var = {"peak_id": [f"chr1_{i*100}_{i*100+50}" for i in range(n_peaks)]}
+    # Create peaks
+    peak_names = [f"chr{np.random.randint(1, 23)}_{i*100}_{i*100+50}" for i in range(n_peaks)]
+    peak_names = list(pd.Series(peak_names).drop_duplicates())
+    while len(peak_names) < n_peaks:
+        new_peak = f"chr{np.random.randint(1, 23)}_{np.random.randint(1, 10000)*100}_{np.random.randint(1, 10000)*100+50}"
+        if new_peak not in peak_names:
+            peak_names.append(new_peak)
+            
+    atac_obs = {
+        "cell_id": [f"multi_cell_{i}" for i in range(n_cells_actual)], 
+        "true_cluster": [str(c) for c in y],
+        "batch": batch_labels
+    }
+    atac_var = {"peak_id": list(peak_names)[:n_peaks]}
     atac_adata = ad.AnnData(X=atac_X, obs=pd.DataFrame(atac_obs), var=pd.DataFrame(atac_var))
     atac_adata.obs_names = atac_adata.obs["cell_id"]
     atac_adata.var_names = atac_adata.var["peak_id"]
