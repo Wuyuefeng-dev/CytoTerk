@@ -99,6 +99,12 @@ scCytoTrek is organized into distinct functional modules:
 - **Dot Plot Visualisation:** Sending/receiving populations vs interaction strength.
 - **UMAP Arc Plot:** `plot_cell2cell_umap()` — Bézier arcs between cluster centroids on the UMAP; arc width = interaction strength, colour = sender cluster, arrowhead = receiver direction. Includes a strength scale-bar inset.
 
+````carousel
+![Cell-Cell Interaction Dotplot](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cell2cell_interaction.png)
+<!-- slide -->
+![Cell-Cell Interaction UMAP Arcs](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cci_umap_arcs.png)
+````
+
 ### 6. Lineage Tracing (`sccytotrek.lineage`)
 - **Barcode Dropout Imputation:** RNA-space weighted kNN majority-vote recovery of up to 50% missing barcodes.
 - **Clonal Streamgraph + Barcode Timeline:** `plot_clonal_streamgraph()` now includes a **barcode event timeline panel** — per-clone horizontal spans showing first/last pseudotime appearance with individual cell rug marks, alongside the streamgraph and two UMAP panels.
