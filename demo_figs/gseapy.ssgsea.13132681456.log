@@ -1,0 +1,10 @@
+2026-02-26 10:44:54,713 ssgsea13132681456::[INFO    ] Parsing data files for ssGSEA...........................
+2026-02-26 10:44:54,713 ssgsea13132681456::[DEBUG   ] Input data is a DataFrame with gene names
+2026-02-26 10:44:54,874 ssgsea13132681456::[INFO    ] 0002 gene_sets have been filtered out when max_size=500 and min_size=15
+2026-02-26 10:44:54,875 ssgsea13132681456::[ERROR   ] No gene sets passed through filtering condition !!! 
+Hint 1: Try to lower min_size or increase max_size !
+Hint 2: Check gene symbols are identifiable to your gmt input.
+Hint 3: Gene symbols curated in Enrichr web services are all upcases.
+
+2026-02-26 10:44:54,875 ssgsea13132681456::[ERROR   ] The first entry of your gene_sets (gmt) look like this : { Pathway_A: [NCAM1, BANK1]}
+2026-02-26 10:44:54,875 ssgsea13132681456::[ERROR   ] The first 5 genes look like this : [ CD14, MUC1, HLA-DRB1, GNLY, MKI67 ]
