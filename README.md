@@ -1,8 +1,8 @@
 # scCytoTrek 🚀
 
-**scCytoTrek** is a **vibe-coding–based** scRNA-seq analysis framework built for the purpose of testing LLM-assisted bioinformatics analysis. It aims to provide a comprehensive, scalable, and multi-functional Python package specifically designed for advanced single-cell and multi-omic data workflows. Built on top of `anndata` and `scanpy`, scCytoTrek minimises external dependencies by providing custom, tailored algorithms for a wide variety of analytical tasks.
+**scCytoTrek** is a **vibe-coding–based** scRNA-seq analysis framework built for the purpose of testing LLM-assisted bioinformatics analysis. The primary goal of this package is to evaluate the viability of Natural Language programming (vibe coding) in developing complex analytical workflows, **not for actual scientific research purposes**. 
 
-Designed to give researchers deep insights into cellular heterogeneity, trajectory dynamics, cell-cell communication, and regulatory networks — all through natural-language-driven development.
+Built on top of `anndata` and `scanpy`, scCytoTrek minimises external dependencies by providing custom, tailored algorithms for a wide variety of analytical tasks — from cell-cell communication to multi-modal integration.
 
 > 💡 **We welcome additional vibe-coded contributions to this package!**  
 > For questions, suggestions, or collaborations, contact: **wuyuefeng@westlake.edu.cn**
@@ -60,7 +60,15 @@ scCytoTrek is organized into distinct functional modules:
 ### 10. Multimodal Integration (`sccytotrek.integration` & `sccytotrek.multiome`)
 - **Cross-Species Alignment:** Human ↔ Mouse ↔ Rat ortholog conversion → CCA → joint t-SNE.
 - **Bulk RNA Projection:** SeuratExtend-style 4-panel figure (t-SNE + stars, pie charts, heatmap, dot plot).
-- **Multi-Omics Integration (5 methods):** WNN, CCA, ConcatPCA, Procrustes, SNF on RNA+ATAC, RNA+Methylation, RNA+Protein.
+- **Multi-Omics Integration (5 methods):** Benchmarks WNN, CCA, ConcatPCA, Procrustes, and SNF on RNA+ATAC, RNA+Methylation, and RNA+Protein datasets with Silhouette and Batch LISI quality metrics. Run `demo_multiome_integration.py`.
+
+````carousel
+![RNA + ATAC Integration](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/multiome_rna_atac_integration.png)
+<!-- slide -->
+![RNA + Methylation Integration](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/multiome_rna_methylation_integration.png)
+<!-- slide -->
+![RNA + Protein Integration](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/multiome_rna_protein_integration.png)
+````
 
 ### 11. Unified SeuratExtend Aesthetics (`sccytotrek.plotting`)
 - **`apply_seurat_theme(ax)`** — whitegrid, NPG discrete palette, no top/right spines.

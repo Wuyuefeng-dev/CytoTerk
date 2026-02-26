@@ -125,15 +125,17 @@ def plot_doublet_scores(
     adata: AnnData,
     use_rep: str = 'X_umap',
     show: bool = True,
-    save: str = None
+    save: str | None = None
 ):
     """
     Plot doublet scores and classification on the UMAP embedding.
-    Generates a multi-panel figure:
+    Generates a multi-panel figure in SeuratExtend style:
       - Panel 1: UMAP colored by continuous doublet_score
       - Panel 2: UMAP colored by binary predicted_doublet
       - Panel 3: Score distribution histogram (singlets vs doublets)
-      - Panel 4: Box plot of doublet scores by cluster (if leiden/louvain exist)
+      - Panel 4: Box plot of doublet scores by cluster
+      - Panel 5: Cumulative score distribution
+      - Panel 6: UMAP with scores mapped to point size
 
     Parameters
     ----------
@@ -147,10 +149,24 @@ def plot_doublet_scores(
         Path to save the figure.
     """
     import matplotlib
-    matplotlib.use('Agg')
+    if save:
+        matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
+    import matplotlib.gridspec as gridspec
     import scanpy as sc
+
+    try:
+        from sccytotrek.plotting.style import (
+            apply_seurat_theme, SEURAT_DISCRETE, SEURAT_EXPR_CMAP,
+            FIG_BG, TITLE_SIZE, LABEL_SIZE, TICK_SIZE,
+        )
+    except ImportError:
+        FIG_BG, TITLE_SIZE, LABEL_SIZE, TICK_SIZE = "white", 13, 9, 8
+        SEURAT_DISCRETE = ["#4DBBD5","#E64B35","#00A087","#3C5488","#F39B7F",
+                           "#8491B4","#91D1C2","#DC0000","#7E6148","#B09C85"]
+        SEURAT_EXPR_CMAP = "YlOrRd"
+        def apply_seurat_theme(ax, **kw): return ax
 
     if 'doublet_score' not in adata.obs:
         raise ValueError("Run identify_doublets() first.")
@@ -162,47 +178,54 @@ def plot_doublet_scores(
     is_doublet = adata.obs['predicted_doublet'].values
     umap_coords = adata.obsm[use_rep]
 
-    fig = plt.figure(figsize=(18, 12), facecolor='white')
+    fig = plt.figure(figsize=(18, 12), facecolor=FIG_BG)
+    gs = gridspec.GridSpec(2, 3, figure=fig, wspace=0.3, hspace=0.35)
+
+    COLOR_SINGLET = "#B09C85" # Warm beige
+    COLOR_DOUBLET = "#DC0000" # Crimson
 
     # --- Panel 1: Continuous doublet score on UMAP ---
-    ax1 = fig.add_subplot(2, 3, 1)
-    ax1.set_facecolor('white')
+    ax1 = fig.add_subplot(gs[0, 0])
+    apply_seurat_theme(ax1, spines="none")
     sc1 = ax1.scatter(
         umap_coords[:, 0], umap_coords[:, 1],
-        c=scores, cmap='YlOrRd', s=4, alpha=0.7, rasterized=True
+        c=scores, cmap=SEURAT_EXPR_CMAP, s=4, alpha=0.7, rasterized=True, edgecolors="none"
     )
-    fig.colorbar(sc1, ax=ax1, label='Doublet Score', fraction=0.046, pad=0.04)
-    ax1.set_title('Doublet Score (Continuous)', fontsize=12, fontweight='bold')
-    ax1.set_xlabel('UMAP 1'); ax1.set_ylabel('UMAP 2')
+    plt.colorbar(sc1, ax=ax1, label='Doublet Score', fraction=0.046, pad=0.04)
+    ax1.set_title('Doublet Score (Continuous)', fontsize=TITLE_SIZE, fontweight='bold')
+    ax1.set_xlabel('UMAP 1', fontsize=LABEL_SIZE); ax1.set_ylabel('UMAP 2', fontsize=LABEL_SIZE)
 
     # --- Panel 2: Binary predicted doublets on UMAP ---
-    ax2 = fig.add_subplot(2, 3, 2)
-    ax2.set_facecolor('white')
-    colors_binary = ['#ccccdd' if not d else '#d62728' for d in is_doublet]
-    ax2.scatter(umap_coords[:, 0], umap_coords[:, 1], c=colors_binary, s=4, alpha=0.7, rasterized=True)
-    from matplotlib.patches import Patch
-    legend_els = [Patch(fc='#ccccdd', label='Singlet'), Patch(fc='#d62728', label='Doublet')]
-    ax2.legend(handles=legend_els, loc='upper right', framealpha=0.8)
-    ax2.set_title('Predicted Doublets', fontsize=12, fontweight='bold')
-    ax2.set_xlabel('UMAP 1'); ax2.set_ylabel('UMAP 2')
+    ax2 = fig.add_subplot(gs[0, 1])
+    apply_seurat_theme(ax2, spines="none")
+    mask_s = ~is_doublet
+    
+    # Plot singlets first, then doublets on top
+    ax2.scatter(umap_coords[mask_s, 0], umap_coords[mask_s, 1],
+                c=COLOR_SINGLET, s=4, alpha=0.6, rasterized=True, edgecolors="none", label="Singlet")
+    ax2.scatter(umap_coords[is_doublet, 0], umap_coords[is_doublet, 1],
+                c=COLOR_DOUBLET, s=8, alpha=0.9, rasterized=True, edgecolors="none", label="Doublet")
+    
+    ax2.legend(fontsize=TICK_SIZE, loc='upper right', frameon=False, markerscale=2)
+    ax2.set_title('Predicted Doublets', fontsize=TITLE_SIZE, fontweight='bold')
+    ax2.set_xlabel('UMAP 1', fontsize=LABEL_SIZE); ax2.set_ylabel('UMAP 2', fontsize=LABEL_SIZE)
 
     # --- Panel 3: Score histogram ---
-    ax3 = fig.add_subplot(2, 3, 3)
-    ax3.set_facecolor('#f7f7f7')
-    ax3.hist(scores[~is_doublet], bins=50, alpha=0.75, color='#4292c6', label='Singlet', density=True)
-    ax3.hist(scores[is_doublet],  bins=50, alpha=0.75, color='#d62728', label='Doublet', density=True)
+    ax3 = fig.add_subplot(gs[0, 2])
+    apply_seurat_theme(ax3, grid=True)
+    ax3.hist(scores[mask_s], bins=50, alpha=0.75, color=COLOR_SINGLET, label='Singlet', density=True)
+    ax3.hist(scores[is_doublet],  bins=50, alpha=0.75, color=COLOR_DOUBLET, label='Doublet', density=True)
     if is_doublet.sum() > 0:
         threshold = np.min(scores[is_doublet])
-        ax3.axvline(threshold, color='#e6a817', linestyle='--', lw=1.5, label=f'Threshold={threshold:.3f}')
-    ax3.set_title('Score Distribution', fontsize=12, fontweight='bold')
-    ax3.set_xlabel('Doublet Score'); ax3.set_ylabel('Density')
-    ax3.legend()
-
+        ax3.axvline(threshold, color='#00A087', linestyle='--', lw=1.5, label=f'Threshold={threshold:.3f}')
+    ax3.set_title('Score Distribution', fontsize=TITLE_SIZE, fontweight='bold')
+    ax3.set_xlabel('Doublet Score', fontsize=LABEL_SIZE); ax3.set_ylabel('Density', fontsize=LABEL_SIZE)
+    ax3.legend(fontsize=TICK_SIZE, frameon=False)
 
     # --- Panel 4: Stats summary table ---
-    ax4 = fig.add_subplot(2, 3, 4)
+    ax4 = fig.add_subplot(gs[1, 0])
+    ax4.axis('tight')
     ax4.axis('off')
-    ax4.set_facecolor('#0e0e0e')
     summary = doublet_statistical_summary(adata)
     table_data = [
         ['Metric', 'Value'],
@@ -212,64 +235,48 @@ def plot_doublet_scores(
         ['Doublet Rate', f"{summary['doublet_rate_%']}%"],
         ['Score Mean', f"{summary['score_mean']:.4f}"],
         ['Score Median', f"{summary['score_median']:.4f}"],
-        ['Score Std', f"{summary['score_std']:.4f}"],
-        ['Score Q25', f"{summary['score_q25']:.4f}"],
-        ['Score Q75', f"{summary['score_q75']:.4f}"],
+        ['Score Max', f"{summary['score_max']:.4f}"],
     ]
-    tbl = ax4.table(cellText=table_data[1:], colLabels=table_data[0],
-                    cellLoc='center', loc='center',
-                    bbox=[0, 0, 1, 1])
-    tbl.auto_set_font_size(False)
-    tbl.set_fontsize(9)
-    for (row, col), cell in tbl.get_celld().items():
-        cell.set_edgecolor('#555555')
-        if row == 0:
-            cell.set_facecolor('#2a2a4a')
-            cell.get_text().set_color('white')
-            cell.get_text().set_fontweight('bold')
-        elif row % 2 == 0:
-            cell.set_facecolor('#1a1a2e')
-            cell.get_text().set_color('#cccccc')
-        else:
-            cell.set_facecolor('#111130')
-            cell.get_text().set_color('#cccccc')
-    ax4.set_title('Statistical Summary', color='white', fontsize=12, fontweight='bold', pad=10)
+    
+    # Simple table using text directly for better aesthetic matching Seurat
+    y_pos = 0.9
+    for row in table_data:
+        fw = 'bold' if y_pos == 0.9 else 'normal'
+        ax4.text(0.1, y_pos, row[0], fontsize=LABEL_SIZE + 1, fontweight=fw, transform=ax4.transAxes)
+        ax4.text(0.6, y_pos, row[1], fontsize=LABEL_SIZE + 1, fontweight=fw, transform=ax4.transAxes)
+        y_pos -= 0.1
+    ax4.set_title('Statistical Summary', fontsize=TITLE_SIZE, fontweight='bold', pad=10)
 
     # --- Panel 5: Cumulative score distribution ---
-    ax5 = fig.add_subplot(2, 3, 5)
-    ax5.set_facecolor('#1a1a2e')
+    ax5 = fig.add_subplot(gs[1, 1])
+    apply_seurat_theme(ax5, grid=True)
     sorted_scores = np.sort(scores)
     ax5.plot(sorted_scores, np.linspace(0, 1, len(sorted_scores)),
-             color='#29b6f6', lw=2, label='Empirical CDF')
+             color='#3C5488', lw=2, label='Empirical CDF')
     if is_doublet.sum() > 0:
         thr = np.min(scores[is_doublet])
-        ax5.axvline(thr, color='gold', linestyle='--', lw=1.5, label=f'Threshold={thr:.3f}')
-    ax5.set_title('Cumulative Score Distribution', color='white', fontsize=12, fontweight='bold')
-    ax5.set_xlabel('Doublet Score', color='white'); ax5.set_ylabel('Fraction of Cells', color='white')
-    ax5.legend(framealpha=0.3, labelcolor='white')
-    ax5.tick_params(colors='white'); [s.set_color('white') for s in ax5.spines.values()]
+        ax5.axvline(thr, color='#00A087', linestyle='--', lw=1.5, label=f'Threshold={thr:.3f}')
+    ax5.set_title('Cumulative Score Distribution', fontsize=TITLE_SIZE, fontweight='bold')
+    ax5.set_xlabel('Doublet Score', fontsize=LABEL_SIZE); ax5.set_ylabel('Fraction of Cells', fontsize=LABEL_SIZE)
+    ax5.legend(fontsize=TICK_SIZE, frameon=False)
 
     # --- Panel 6: UMAP — scores as size ---
-    ax6 = fig.add_subplot(2, 3, 6)
-    ax6.set_facecolor('#0e0e0e')
-    # Plot singlets first, then doublets on top
-    mask_s = ~is_doublet
+    ax6 = fig.add_subplot(gs[1, 2])
+    apply_seurat_theme(ax6, spines="none")
     ax6.scatter(umap_coords[mask_s, 0], umap_coords[mask_s, 1],
-                c='#334466', s=3, alpha=0.4, label='Singlet', rasterized=True)
+                c=COLOR_SINGLET, s=3, alpha=0.4, label='Singlet', rasterized=True, edgecolors="none")
     ax6.scatter(umap_coords[is_doublet, 0], umap_coords[is_doublet, 1],
-                c=scores[is_doublet], cmap='hot', s=scores[is_doublet] * 80 + 10,
-                alpha=0.9, label='Doublet', rasterized=True)
-    ax6.set_title('Doublet Probability (Size=Score)', color='white', fontsize=11, fontweight='bold')
-    ax6.set_xlabel('UMAP 1', color='white'); ax6.set_ylabel('UMAP 2', color='white')
-    ax6.tick_params(colors='white'); [s.set_color('white') for s in ax6.spines.values()]
-    ax6.legend(framealpha=0.3, labelcolor='white', markerscale=2)
+                c=scores[is_doublet], cmap=SEURAT_EXPR_CMAP, s=scores[is_doublet] * 80 + 10,
+                alpha=0.9, label='Doublet', rasterized=True, edgecolors="none")
+    ax6.set_title('Doublet Probability (Size=Score)', fontsize=TITLE_SIZE, fontweight='bold')
+    ax6.set_xlabel('UMAP 1', fontsize=LABEL_SIZE); ax6.set_ylabel('UMAP 2', fontsize=LABEL_SIZE)
+    ax6.legend(fontsize=TICK_SIZE, frameon=False, markerscale=1, loc='upper right')
 
-    fig.suptitle('scCytoTrek — Doublet Detection Analysis', color='white',
-                 fontsize=16, fontweight='bold', y=1.01)
-    plt.tight_layout()
-
+    fig.suptitle('scCytoTrek — Doublet Detection Analysis',
+                 fontsize=TITLE_SIZE + 2, fontweight='bold', y=1.02)
+                 
     if save:
-        plt.savefig(save, dpi=180, bbox_inches='tight', facecolor='#0e0e0e')
+        plt.savefig(save, dpi=180, bbox_inches='tight', facecolor=FIG_BG)
         print(f"Saved doublet plot to {save}")
     if show:
         plt.show()
