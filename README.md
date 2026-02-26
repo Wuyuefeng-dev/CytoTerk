@@ -9,6 +9,64 @@ Built on top of `anndata` and `scanpy`, scCytoTrek minimises external dependenci
 
 ---
 
+## 🏗️ Architecture Overview
+
+The package is broken down into modular components that logically follow standard and advanced single-cell analysis workflows:
+
+```mermaid
+flowchart TB
+    %% Core Nodes
+    sc[scCytoTrek 🚀<br/>Vibe-Coding scRNA-seq Framework]
+
+    %% Modules
+    subgraph Pre["Core Preprocessing & Tools"]
+        prep["preprocessing<br/>(Subsampling, KNN Imputation)"]
+        tools["tools<br/>(PCA/UMAP, Doublets, CellTypist)"]
+        clus["clustering<br/>(Leiden, Meta-clustering)"]
+    end
+
+    subgraph Down["Downstream Analysis"]
+        traj["trajectory<br/>(Monocle3, Pseudotime Heatmaps)"]
+        lin["lineage<br/>(Clonal Expansion, Streamgraphs)"]
+        inter["interaction<br/>(CCI Arcs, Drug Targets)"]
+        tf["tf_enrichment<br/>(DoRothEA TF Scores)"]
+        grn["grn<br/>(GENIE3, PIDC)"]
+    end
+
+    subgraph Adv["Advanced Integration & Spatial"]
+        spat["spatial<br/>(Moran's I, Niche-CCI)"]
+        multi["integration & multiome<br/>(WNN, CCA, Cross-Species, Bulk)"]
+    end
+
+    %% Connections
+    sc --> prep
+    prep --> tools
+    tools --> clus
+
+    clus --> traj
+    clus --> lin
+    clus --> inter
+    clus --> tf
+
+    tf --> grn
+
+    clus --> spat
+    clus --> multi
+
+    %% Styling Theme
+    plot["plotting<br/>(SeuratExtend Unified Theme)"]
+    Down -.-> plot
+    Adv -.-> plot
+    Pre -.-> plot
+
+    classDef pkg fill:#f4f4f4,stroke:#333,stroke-width:2px,font-weight:bold;
+    classDef module fill:#e3f2fd,stroke:#1565c0,stroke-width:1px;
+    class sc pkg;
+    class prep,tools,clus,traj,lin,inter,tf,grn,spat,multi,plot module;
+```
+
+---
+
 ## 🌟 Key Features & Modules
 
 scCytoTrek is organized into distinct functional modules:
