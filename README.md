@@ -87,18 +87,6 @@ scCytoTrek is organized into distinct functional modules:
 ### 3. Advanced Clustering (`sccytotrek.clustering`)
 - **NMF, K-Means, Agglomerative, Spectral, GMM, DBSCAN** — 6 alternative clustering strategies beyond Leiden/Louvain.
 
-````carousel
-![Leiden (Base)](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/leiden_clusters.png)
-<!-- slide -->
-![K-Means](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/kmeans_clusters.png)
-<!-- slide -->
-![GMM](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/gmm_clusters.png)
-<!-- slide -->
-![DBSCAN](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/dbscan_clusters.png)
-<!-- slide -->
-![Agglomerative](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/agglomerative_clusters.png)
-````
-
 ### 4. Trajectory Inference & Tipping Points (`sccytotrek.trajectory`)
 - **Pseudotime Inference:** DPT, Slingshot, Palantir, CellRank, and Monocle3 wrappers.
 - **Pseudotime-Correlated Genes:** `find_pseudotime_genes()` — Spearman correlation of each gene with pseudotime; returns ranked DataFrame with direction (up/down).
@@ -106,26 +94,12 @@ scCytoTrek is organized into distinct functional modules:
 - **Sandpile Tipping Points:** Detect critical-state transitions via network entropy spikes; `plot_tipping_genes()` shows entropy curve + top hub-weight genes.
 - **Trajectory Streamgraphs:** Population flow over pseudotime.
 
-````carousel
-![Pseudotime Comparison](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/trajectory_comparison.png)
-<!-- slide -->
-![Tipping Point Entropy](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/sandpile_entropy_trajectory.png)
-<!-- slide -->
-![Tipping Genes Barplot](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/tipping_genes_barplot.png)
-````
-
-````carousel
-![Pseudotime Comparison](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/trajectory_comparison.png)
-<!-- slide -->
-![Tipping Point Entropy](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/sandpile_entropy_trajectory.png)
-<!-- slide -->
-![Tipping Genes Barplot](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/tipping_genes_barplot.png)
-````
-
 ### 5. Cell-Cell Communication (`sccytotrek.interaction`)
 - **CellPhoneDB-style Scoring:** Non-parametric permutation tests for LR pair significance.
 - **Dot Plot Visualisation:** Sending/receiving populations vs interaction strength.
 - **UMAP Arc Plot:** `plot_cell2cell_umap()` — Bézier arcs between cluster centroids on the UMAP; arc width = interaction strength, colour = sender cluster, arrowhead = receiver direction. Includes a strength scale-bar inset.
+
+![Cell-Cell Interaction UMAP Arcs](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cci_umap_arcs.png)
 
 ### 6. Lineage Tracing (`sccytotrek.lineage`)
 - **Barcode Dropout Imputation:** RNA-space weighted kNN majority-vote recovery of up to 50% missing barcodes.
