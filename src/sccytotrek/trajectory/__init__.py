@@ -3,18 +3,21 @@ from .lineage import build_lineage_graph
 from .complex_lineage import build_polylox_tree, build_darlin_tree
 from .pseudotime import run_trajectory_inference, run_monocle3, run_slingshot_pseudotime, run_palantir_pseudotime, run_cellrank_pseudotime
 from .ordering import find_ordering_genes
+from .pseudotime_genes import find_pseudotime_genes, plot_pseudotime_heatmap
 
 __all__ = [
     "compute_sandpile_entropy",
     "plot_tipping_genes",
     "plot_tipping_point_umap",
-    "build_lineage_graph", 
-    "build_polylox_tree", 
-    "build_darlin_tree", 
-    "run_trajectory_inference", 
-    "run_monocle3", 
-    "run_slingshot_pseudotime", 
-    "run_palantir_pseudotime", 
+    "build_lineage_graph",
+    "build_polylox_tree",
+    "build_darlin_tree",
+    "run_trajectory_inference",
+    "run_monocle3",
+    "run_slingshot_pseudotime",
+    "run_palantir_pseudotime",
     "run_cellrank_pseudotime",
-    "find_ordering_genes"
+    "find_ordering_genes",
+    "find_pseudotime_genes",
+    "plot_pseudotime_heatmap",
 ]

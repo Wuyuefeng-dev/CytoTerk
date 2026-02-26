@@ -11,53 +11,59 @@ It is designed to give researchers deep insights into cellular heterogeneity, tr
 scCytoTrek is organized into distinct functional modules:
 
 ### 1. Preprocessing (`sccytotrek.preprocessing`)
-- **Fast Cell Subsampling:** Downsample massive datasets while preserving cluster diversity.
-- **KNN Imputation:** Advanced k-nearest neighbors smoothing to recover lost signal from dropout events.
-- **Robust QC & Normalization:** Standard single-cell QC wrappers integrated smoothly.
+- **Fast Cell Subsampling:** Downsample while preserving cluster diversity.
+- **KNN Imputation:** k-NN dropout smoothing before DE testing.
+- **Robust QC & Normalization:** Standard QC wrappers with violin plots.
 
 ### 2. Tools & Analysis (`sccytotrek.tools`)
-- **Custom Doublet Identification:** Detect artificial doublets using PCA-based neighborhood density (no generic dependencies required).
-- **Dropout-Adjusted Differential Expression:** Perform DE analysis while correcting for varying cellular capture efficiencies (Cellular Detection Rate - CDR).
-- **Confounder Regression:** Remove technical batch effects or uninteresting covariates directly from the expression matrix.
-- **Cell Type Identification:** Score and assign biological cell types based on known marker gene lists.
-- **Clinical Survival Correlation:** Integrate scRNA-seq expression with patient survival data using Lifelines.
+- **Custom Doublet Identification:** PCA-density neighborhood doublet detection — no Scrublet dependency.
+- **Dropout-Adjusted DE:** Differential expression corrected for Cellular Detection Rate (CDR).
+- **Confounder Regression:** Remove technical covariates directly from the expression matrix.
+- **Cell Type Scoring:** Cluster-level scoring against user-supplied marker dictionaries.
+- **CellTypist Integration:** `run_celltypist()` — automated cell-type classification using CellTypist pretrained models (`Immune_All_Low.pkl`, etc.) with majority-voting, auto-normalisation, confidence score, and graceful fallback to marker scoring. `plot_celltypist_umap()` renders a 3-panel SeuratExtend figure (type UMAP, confidence UMAP, violin per type).
+- **Clinical Survival Correlation:** Integrate scRNA-seq with patient survival data (Lifelines).
 
 ### 3. Advanced Clustering (`sccytotrek.clustering`)
-- **Non-Negative Matrix Factorization (NMF):** Discover additive, interpretable gene expression programs (meta-genes).
-- **K-Means:** Rapid quantization for massive datasets or highly distinct, globular clusters.
-- **Agglomerative (Hierarchical):** Uncover evolutionary or developmental hierarchies holding sub-lineages.
-- **Spectral Clustering:** Identify non-convex and continuous manifold structures where K-Means fails.
-- **Gaussian Mixture Models (GMM):** Model continuous differentiation bridges using soft-probabilistic cell assignments.
-- **DBSCAN:** Density-based clustering, perfect for spatial data and isolating outlier/noise cells.
+- **NMF, K-Means, Agglomerative, Spectral, GMM, DBSCAN** — 6 alternative clustering strategies beyond Leiden/Louvain.
 
 ### 4. Trajectory Inference & Tipping Points (`sccytotrek.trajectory`)
-- **Pseudotime Inference:** Automated wrappers for constructing DPT progression trajectories, alongside **Slingshot**, **Palantir**, and **CellRank** approximations.
-- **Trajectory Visualization:** Streamgraphs visualizing dynamic cell-type proportion flows across pseudotime axes (`plot_streamgraph`), complementing Monocle3 principal graphs.
-- **Ordering Effect Genes:** Identify which genes drive progression alongside the pseudotime axis.
-- **Sandpile Model for Tipping Points:** Detect critical states ('tipping points') predicting sudden shifts in cellular fate using a robust network-entropy algorithm.
-- **Lineage Extraction:** Extract differentiation graphs and parse complex barcoding data (e.g., Polylox, DARLIN arrays).
+- **Pseudotime Inference:** DPT, Slingshot, Palantir, CellRank, and Monocle3 wrappers.
+- **Pseudotime-Correlated Genes:** `find_pseudotime_genes()` — Spearman correlation of each gene with pseudotime; returns ranked DataFrame with direction (up/down).
+- **Pseudotime Expression Heatmap:** `plot_pseudotime_heatmap()` — smoothed, z-scored, hierarchically clustered heatmap ordered by pseudotime with cluster colour bar and direction-coded gene labels.
+- **Sandpile Tipping Points:** Detect critical-state transitions via network entropy spikes; `plot_tipping_genes()` shows entropy curve + top hub-weight genes.
+- **Trajectory Streamgraphs:** Population flow over pseudotime.
 
 ### 5. Cell-Cell Communication (`sccytotrek.interaction`)
-- **Custom CellPhoneDB Algorithm:** Natively score Ligand-Receptor pair significance via randomized permutation tests.
-- **Cell2Cell Plotting:** Exquisite visual dot-plots mapping sending/receiving populations to interaction strength and precision (-log10(p)).
+- **CellPhoneDB-style Scoring:** Non-parametric permutation tests for LR pair significance.
+- **Dot Plot Visualisation:** Sending/receiving populations vs interaction strength.
+- **UMAP Arc Plot:** `plot_cell2cell_umap()` — Bézier arcs between cluster centroids on the UMAP; arc width = interaction strength, colour = sender cluster, arrowhead = receiver direction. Includes a strength scale-bar inset.
 
-### 6. Lineage Tracing & Integration (`sccytotrek.lineage`)
-- **Barcode Dropout Imputation:** Use robust non-linear kNN expression topological imputation to fill in up to 50% missing cellular barcodes.
-- **Lineage Visualization:** Specialized UMAPs and bar plots comparing cell clone densities before and after imputation.
+### 6. Lineage Tracing (`sccytotrek.lineage`)
+- **Barcode Dropout Imputation:** RNA-space weighted kNN majority-vote recovery of up to 50% missing barcodes.
+- **Clonal Streamgraph + Barcode Timeline:** `plot_clonal_streamgraph()` now includes a **barcode event timeline panel** — per-clone horizontal spans showing first/last pseudotime appearance with individual cell rug marks, alongside the streamgraph and two UMAP panels.
 
-### 7. Gene Regulatory Networks & GRN (`sccytotrek.grn`)
-- **Custom TF Enrichment:** Predict transcription factor activity solely via dot-product network weights (no heavy dependencies).
-- **In Silico Gene Knockdown:** Predict how genetic perturbations shift cell states on the PCA/UMAP manifold.
+### 7. Gene Regulatory Networks (`sccytotrek.grn`)
+- **TF Enrichment:** Weighted dot-product TF activity scoring, RNA-expression adjusted.
+- **In Silico Knockdown:** Predict cell-state shifts from gene perturbations.
 
-### 8. Pathway Analysis (`sccytotrek.pathway`)
-- **GSVA / ssGSEA:** True single-cell pathway enrichment with `gseapy`, projected effortlessly onto UMAP embeddings.
-- **GO Biological Process Over-Representation:** Direct API for gene set enrichment testing.
+### 8. Drug Target Testing (`sccytotrek.interaction`)
+- **`score_drug_targets()`:** Score drug candidates against cell clusters using DrugBank-style target tables. Aggregates mean expression of each drug's target genes per cluster and returns a **Drug × Cluster expression pivot table** for rapid hit prioritisation.
+- **Usage:** Supply any DataFrame with `Gene_Name` / `Drug_Name` columns (DrugBank CSV export or custom list).
 
-### 9. Multi-modal Integration (`sccytotrek.integration` & `sccytotrek.multiome`)
-- **scVI Deep Learning Integration:** Perform batch integration and complex latent sub-clustering using state-of-the-art variational autoencoders.
-- **Cross-Species Alignment:** Full Human ↔ Mouse ↔ Rat pipeline with mock ortholog table generator, 5-panel **Venn diagram** of gene overlaps (Jaccard similarity, conservation scores), and CCA-based joint t-SNE visualization. Run `demo_cross_species.py`.
-- **Bulk RNA Projection (SeuratExtend-style):** Project bulk RNA-seq samples into the SC UMAP via true PCA-loading projection. Generates a 4-panel figure: SC UMAP + bulk star overlay, per-sample cluster composition pie charts, bulk×cluster Pearson heatmap, and marker gene dot plot. Run `demo_bulk_alignment.py`.
-- **Multi-Omics Integration (5 methods, 3 dataset types):** Benchmarks WNN, CCA, ConcatPCA, Procrustes, and SNF on RNA+ATAC, RNA+Methylation, and RNA+Protein datasets with Silhouette and Batch LISI quality metrics. Run `demo_multiome_integration.py`.
+### 9. Pathway Analysis (`sccytotrek.pathway`)
+- **GSVA / ssGSEA:** Single-cell pathway enrichment via `gseapy`, projected onto UMAP.
+- **GO Over-Representation:** Direct API for biological-process enrichment.
+
+### 10. Multimodal Integration (`sccytotrek.integration` & `sccytotrek.multiome`)
+- **Cross-Species Alignment:** Human ↔ Mouse ↔ Rat ortholog conversion → CCA → joint t-SNE.
+- **Bulk RNA Projection:** SeuratExtend-style 4-panel figure (t-SNE + stars, pie charts, heatmap, dot plot).
+- **Multi-Omics Integration (5 methods):** WNN, CCA, ConcatPCA, Procrustes, SNF on RNA+ATAC, RNA+Methylation, RNA+Protein.
+
+### 11. Unified SeuratExtend Aesthetics (`sccytotrek.plotting`)
+- **`apply_seurat_theme(ax)`** — whitegrid, NPG discrete palette, no top/right spines.
+- **`seurat_figure(nrows, ncols)`** — pre-configured figure factory with global rcParams.
+- **`SEURAT_DISCRETE`** — 12-colour NPG palette used consistently across all figures.
+
 
 ---
 

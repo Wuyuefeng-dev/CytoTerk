@@ -4,12 +4,12 @@ from .doublet import identify_doublets, doublet_statistical_summary, plot_double
 from .survival import compute_survival_by_cluster
 from .confounder import regress_confounders
 from .differential_expression import dropout_adjusted_de
-from .cell_type import score_cell_types
+from .cell_type import score_cell_types, run_celltypist, plot_celltypist_umap
 
 __all__ = [
-    "run_pca_and_neighbors", 
-    "run_umap_and_cluster", 
-    "make_pseudobulk", 
+    "run_pca_and_neighbors",
+    "run_umap_and_cluster",
+    "make_pseudobulk",
     "link_rna_state_to_barcode",
     "identify_doublets",
     "doublet_statistical_summary",
@@ -17,5 +17,7 @@ __all__ = [
     "compute_survival_by_cluster",
     "regress_confounders",
     "dropout_adjusted_de",
-    "score_cell_types"
+    "score_cell_types",
+    "run_celltypist",
+    "plot_celltypist_umap",
 ]
