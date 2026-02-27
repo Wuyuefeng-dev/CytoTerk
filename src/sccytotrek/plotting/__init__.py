@@ -1,3 +1,5 @@
+from .base import dim_plot, feature_plot
+
 from .style import (
     apply_seurat_theme,
     seurat_figure,
@@ -11,6 +13,8 @@ from .style import (
 )
 
 __all__ = [
+    "dim_plot",
+    "feature_plot",
     "apply_seurat_theme",
     "seurat_figure",
     "discrete_colors",

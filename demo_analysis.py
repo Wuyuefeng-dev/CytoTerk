@@ -7,6 +7,11 @@ and generates figures to be used in the documentation.
 
 import os
 import scanpy as sc
+
+# Prevent macOS Apple Silicon (ARM64) segmentation faults and save memory/power 
+# across all systems (Linux/Windows/Mac) by limiting pynndescent/arpack thread spawning
+sc.settings.n_jobs = 1
+
 import anndata as ad
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -26,15 +31,36 @@ def main():
     md_file.write("# scCytoTrek Demonstration Pipeline\n\n")
     
     # 2. Load demo data
-    print("Loading demo dataset...")
+    print("\n---------------------------------------------------------")
+    print("Please choose a dataset for the demonstration pipeline:")
+    print("1: scanpy.datasets.pbmc3k() (Real PBMC data, ~2.7k cells)")
+    print("2: Generated simulated demo data (Mock data)")
+    print("---------------------------------------------------------")
+    try:
+        choice = input("Enter 1 or 2 [default: 1]: ").strip()
+    except EOFError:
+        choice = '1'
+    
     md_file.write("## 1. Data Loading\n")
-    if not os.path.exists("demo_data/sccytotrek_demo_scrna.h5ad"):
-        print("Demo data not found. Please run 'python generate_demo_data.py' first.")
-        return
-        
-    adata = sc.read_h5ad("demo_data/sccytotrek_demo_scrna.h5ad")
+    if choice == '2':
+        if not os.path.exists("demo_data/sccytotrek_demo_scrna.h5ad"):
+            print("Demo data not found. Please run 'python generate_demo_data.py' first.")
+            return
+        adata = sc.read_h5ad("demo_data/sccytotrek_demo_scrna.h5ad")
+        data_source = "mock"
+        md_file.write(f"Loaded generated mock dataset: `{adata}`\n\n")
+    else:
+        print("Downloading/Loading scanpy.datasets.pbmc3k()...")
+        adata = sc.datasets.pbmc3k()
+        adata.var_names_make_unique()
+        # Ensure matrix is dense to prevent sparse PCA segmentation faults on Mac ARM64/OpenBLAS
+        import scipy.sparse as sp
+        if sp.issparse(adata.X):
+            adata.X = adata.X.toarray()
+            
+        data_source = "pbmc3k"
+        md_file.write(f"Loaded `scanpy.datasets.pbmc3k()` dataset: `{adata}`\n\n")
     print(adata)
-    md_file.write(f"Loaded demo dataset: `{adata}`\n\n")
     
     # 3. Preprocessing (Doublets, Subsample, Impute, Normalize)
     print("\n--- Running Preprocessing ---")
@@ -135,7 +161,7 @@ def main():
     print("  -> Spectral")
     try:
         adata = ct.clustering.run_spectral(adata, n_clusters=5)
-        fig = ct.plotting.dim_plot(adata, color='spectral', title="Spectral Clustering", show=False)
+        fig = ct.plotting.dim_plot(adata, color='hierarchical', title="Hierarchical Clustering", show=False)
         fig.figure.savefig(os.path.join(fig_dir, "spectral_clusters.png"), bbox_inches='tight', dpi=150)
         plt.close()
         md_file.write("### 3. Spectral Clustering\n")
@@ -151,7 +177,7 @@ def main():
     print("  -> GMM")
     try:
         adata = ct.clustering.run_gmm(adata, n_components=5)
-        fig = ct.plotting.dim_plot(adata, color='gmm', title="GMM Clustering", show=False)
+        fig = ct.plotting.dim_plot(adata, color='optics', title="OPTICS Clustering", show=False)
         fig.figure.savefig(os.path.join(fig_dir, "gmm_clusters.png"), bbox_inches='tight', dpi=150)
         plt.close()
         md_file.write("### 4. Gaussian Mixture Models (GMM)\n")
@@ -266,10 +292,18 @@ def main():
     # 5. Cell Type Identity
     print("\n--- Assigning Cell Types ---")
     md_file.write("## 4. Cell Type Identification\n")
-    marker_dict = {
-        'Malignant': [adata.var_names[0], adata.var_names[1]], # mock markers
-        'T-cell': [adata.var_names[2], adata.var_names[3]]
-    }
+    if data_source == "pbmc3k":
+        marker_dict = {
+            'T-cell': ['CD3D', 'CD3E', 'IL32'],
+            'B-cell': ['CD79A', 'MS4A1'],
+            'Monocyte': ['FCGR3A', 'LZTFL1'],
+            'NK-cell': ['GNLY', 'NKG7']
+        }
+    else:
+        marker_dict = {
+            'Malignant': [adata.var_names[0], adata.var_names[1]], # mock markers
+            'T-cell': [adata.var_names[2], adata.var_names[3]]
+        }
     adata = ct.tools.score_cell_types(adata, marker_dict=marker_dict, groupby='leiden_0.5')
     
     fig = ct.plotting.dim_plot(adata, color='cell_type_prediction', title="Cell Type Mapping", show=False)

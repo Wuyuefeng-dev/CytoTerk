@@ -158,14 +158,28 @@ pip install git+https://github.com/Wuyuefeng-dev/CytoTerk.git
 
 ## 📖 Quick Start & Documentation
 
-To run a full breakdown analysis spanning Preprocessing, Normalization, Tipping Point prediction, GSVA, and Interaction Scoring, run the generated script:
+To run a full breakdown analysis spanning Preprocessing, Normalization, Tipping Point prediction, GSVA, and Interaction Scoring, run the interactive demonstration script:
 
 ```bash
+# Optional: generate mock data beforehand
 python generate_demo_data.py
+
+# Run the interactive pipeline (supports PBMC3k or Mock data)
 python demo_analysis.py
 ```
 
-This generates `demo_figs/demo_report.md` along with dozens of automatically stylized analytical plots showing the capabilities of `scCytoTrek`.
+This generates `demo_figs/demo_report.md` along with dozens of automatically stylized analytical plots showing the capabilities of `scCytoTrek`. 
+
+### Jupyter Notebook Support
+scCytoTrek includes a programatic Jupyter Notebook generator to encapsulate the entire PBMC3k analysis workflow into a portable, executable format.
+```bash
+python generate_notebook.py
+# Opens the newly created demo_analysis.ipynb
+jupyter notebook demo_analysis.ipynb
+```
+
+### Apple Silicon / Mac ARM64 Native Compatibility
+scCytoTrek natively supports `pbmc3k` data on Apple Silicon (M1/M2/M3) without requiring external environment patching. Due to underlying OpenBLAS/OpenMP segmentation fault issues in `sc.pp.neighbors` when using `arpack` and `pynndescent` on macOS, scCytoTrek avoids thread-crashing by enforcing `sc.settings.n_jobs = 1` and ensuring computationally dense matrices prior to topological dimension reduction operations.
 
 ---
 
