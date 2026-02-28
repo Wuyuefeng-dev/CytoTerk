@@ -9,7 +9,7 @@ We begin by evaluating total molecular distributions (UMI Depth) to remove empty
 
 ![QC Violins](qc_violins.png)
 
-- **Doublet Detection:** Custom kNN-based doublet finding. Identified and removed 138 doublets.
+- **Doublet Detection:** Custom kNN-based doublet finding. Identified and removed 140 doublets.
   ![Before Doublet Removal](doublets_before.png)
   ![After Doublet Removal](doublets_after.png)
 
@@ -78,10 +78,10 @@ Assigned cell types based on simple gene module scoring of known markers over cl
 ![Cell Types](cell_types.png)
 
 ## 5. Differential Expression
-Conducted Dropout-Adjusted Differential Expression between `2` and `0`. Results outputted to `differential_expression.csv`.
+Conducted Dropout-Adjusted Differential Expression between `1` and `0`. Results outputted to `differential_expression.csv`.
 
 ## 7. Trajectory Inference & Sandpile Entropy
-Computed trajectory and Sandpile Network Entropy. Tipping point found at bin 19 with entropy 3.147.
+Computed trajectory and Sandpile Network Entropy. Tipping point found at bin 19 with entropy 3.154.
 
 ![Sandpile Entropy Line Graph](sandpile_entropy_trajectory.png)
 
@@ -92,7 +92,7 @@ Identified the critical genes driving the network configuration at the tipping p
 ![Tipping Genes](tipping_genes_barplot.png)
 
 ## 6. Transcription Factor Enrichment
-Evaluated custom transcription factor activities using expression-weighted network scoring for `MIR1302-10`.
+Evaluated transcription factor activities using expression-weighted network scoring for `SPI1`.
 
 ![TF Enrichment UMAP](tf_enrichment_umap.png)
 
@@ -102,3 +102,9 @@ Visualized cluster-specific TF enrichment scores:
 
 ## 8. Pathway Analysis (GSVA)
 ## 9. Cell-Cell Communication (CellPhoneDB Algorithm & Cell2Cell Plot)
+We evaluate extracellular communication by running non-parametric label permutations against biologically relevant immune Ligand-Receptor pairs (e.g., HLA-DRA to CD4, CCL5 to CCR5) on the PBMC data.
+
+![Cell2Cell Interaction](cell2cell_interaction.png)
+
+![Cell2Cell UMAP Arcs](cci_umap_arcs.png)
+

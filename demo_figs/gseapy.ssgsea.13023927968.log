@@ -1,0 +1,10 @@
+2026-02-27 23:44:49,016 ssgsea13023927968::[INFO    ] Parsing data files for ssGSEA...........................
+2026-02-27 23:44:49,025 ssgsea13023927968::[DEBUG   ] Input data is a DataFrame with gene names
+2026-02-27 23:44:50,419 ssgsea13023927968::[INFO    ] 0002 gene_sets have been filtered out when max_size=500 and min_size=15
+2026-02-27 23:44:50,419 ssgsea13023927968::[ERROR   ] No gene sets passed through filtering condition !!! 
+Hint 1: Try to lower min_size or increase max_size !
+Hint 2: Check gene symbols are identifiable to your gmt input.
+Hint 3: Gene symbols curated in Enrichr web services are all upcases.
+
+2026-02-27 23:44:50,419 ssgsea13023927968::[ERROR   ] The first entry of your gene_sets (gmt) look like this : { Mock_Pathway_1: [AL627309.1, RP11-34P13.14, RP11-34P13.9]}
+2026-02-27 23:44:50,420 ssgsea13023927968::[ERROR   ] The first 5 genes look like this : [ MIR1302-10, FAM138A, OR4F5, RP11-34P13.7, RP11-34P13.8 ]

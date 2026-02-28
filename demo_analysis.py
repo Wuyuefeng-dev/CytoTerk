@@ -386,23 +386,46 @@ def main():
     # 9. Custom TF Enrichment
     print("\n--- Custom TF Enrichment ---")
     md_file.write("## 6. Transcription Factor Enrichment\n")
-    # Build a tiny mock TF network using genes that actually exist in the data
-    valid_genes = adata.var_names[:5].tolist()
-    if len(valid_genes) >= 4:
-        tf_df = pd.DataFrame({
-            'tf': [valid_genes[0], valid_genes[0], valid_genes[1], valid_genes[1]],
-            'target': [valid_genes[2], valid_genes[3], valid_genes[2], valid_genes[3]],
-            'weight': [1.0, 0.8, -0.5, 0.9]
-        })
+    # Build a relevant TF network using genes that actually exist in the data (PBMC specific)
+    tf_pairs_list = [
+        ('SPI1', 'LYZ', 1.0),
+        ('SPI1', 'CD14', 0.8),
+        ('STAT1', 'ISG15', 1.0),
+        ('STAT1', 'CXCL10', 0.9),
+        ('PAX5', 'CD79A', 1.0),
+        ('PAX5', 'MS4A1', 0.8)
+    ]
+    
+    valid_pairs = [(tf, tgt, w) for tf, tgt, w in tf_pairs_list if tf in adata.var_names and tgt in adata.var_names]
+    
+    # Fallback to variable genes if the specific ones were filtered out by HVG
+    if not valid_pairs:
+        valid_genes = adata.var_names[:5].tolist()
+        valid_pairs = [
+            (valid_genes[0], valid_genes[2], 1.0),
+            (valid_genes[0], valid_genes[3], 0.8),
+            (valid_genes[1], valid_genes[2], -0.5),
+            (valid_genes[1], valid_genes[3], 0.9)
+        ]
+        
+    tfs, tgts, wts = zip(*valid_pairs)
+    tf_df = pd.DataFrame({
+        'tf': tfs,
+        'target': tgts,
+        'weight': wts
+    })
+    
+    if len(tf_df) >= 1:
+        primary_tf = tf_df['tf'].iloc[0]
         # Use a zero threshold to ensure the mock genes pass
         adata = ct.grn.run_tf_enrichment(adata, tf_network=tf_df, source_col='tf', target_col='target', min_expr_fraction=0.0)
         
         # Plot TF enrichment UMAP
-        if f"tf_score_{valid_genes[0]}" in adata.obs:
-            sc.pl.umap(adata, color=f"tf_score_{valid_genes[0]}", cmap='viridis', show=False, title=f"TF Enrichment: {valid_genes[0]}")
+        if f"tf_score_{primary_tf}" in adata.obs:
+            sc.pl.umap(adata, color=f"tf_score_{primary_tf}", cmap='viridis', show=False, title=f"TF Enrichment: {primary_tf}")
             plt.savefig(os.path.join(fig_dir, "tf_enrichment_umap.png"), bbox_inches='tight', dpi=150)
             plt.close()
-            md_file.write(f"Evaluated custom transcription factor activities using expression-weighted network scoring for `{valid_genes[0]}`.\n\n")
+            md_file.write(f"Evaluated transcription factor activities using expression-weighted network scoring for `{primary_tf}`.\n\n")
             md_file.write(f"![TF Enrichment UMAP](tf_enrichment_umap.png)\n\n")
             
         # Plot TF enrichment Dotplot across clusters
@@ -440,21 +463,45 @@ def main():
     print("\n--- CellPhoneDB Ligand-Receptor Scoring ---")
     md_file.write("## 9. Cell-Cell Communication (CellPhoneDB Algorithm & Cell2Cell Plot)\n")
     try:
-        # Mock LR pairs
-        lr_df = pd.DataFrame({
-            'ligand': [adata.var_names[0], adata.var_names[2]],
-            'receptor': [adata.var_names[1], adata.var_names[3]]
-        })
-        # Run custom CellPhoneDB
-        ccc_res = ct.interaction.run_cellphonedb_scoring(adata, lr_pairs=lr_df, group_key='leiden_0.5', n_perms=100)
+        # Instead of arbitrary first genes, we supply real immune Ligand-Receptor pairs
+        # relevant to PBMC3k (e.g. Antigen Presentation, T-cell activation, Chemokines)
+        lr_pairs_list = [
+            ('HLA-DRA', 'CD4'),
+            ('B2M', 'CD3E'),
+            ('CD86', 'CD28'),
+            ('CCL5', 'CCR5'),
+            ('IL32', 'CD4'),
+            ('HLA-DPB1', 'CD4'),
+            ('CD74', 'CD44')
+        ]
+        
+        # Filter pairs to only those where both genes exist in the PBMC dataset
+        valid_pairs = [(l, r) for l, r in lr_pairs_list if l in adata.var_names and r in adata.var_names]
+        
+        if valid_pairs:
+            ligands, receptors = zip(*valid_pairs)
+            lr_df = pd.DataFrame({
+                'ligand': ligands,
+                'receptor': receptors
+            })
+            
+            # Run custom CellPhoneDB
+            ccc_res = ct.interaction.run_cellphonedb_scoring(adata, lr_pairs=lr_df, group_key='leiden_0.5', n_perms=100)
         
         # Plot Cell2Cell style
         if not ccc_res.empty:
             fig = ct.interaction.plot_cell2cell_dotplot(ccc_res, top_n=20)
             fig.savefig(os.path.join(fig_dir, "cell2cell_interaction.png"), bbox_inches='tight', dpi=150)
             plt.close()
-            md_file.write("Ligand-Receptor interactions scored via non-parametric permutation conceptually identical to CellPhoneDB, visualized dynamically.\n\n")
+            
+            try:
+                ct.interaction.plot_cell2cell_umap(adata, ccc_res, group_key='leiden_0.5', top_n=10, save=os.path.join(fig_dir, "cci_umap_arcs.png"), show=False)
+            except Exception as e:
+                print(f"Arc plotting failed: {e}")
+                
+            md_file.write("We evaluate extracellular communication by running non-parametric label permutations against biologically relevant immune Ligand-Receptor pairs (e.g., HLA-DRA to CD4, CCL5 to CCR5) on the PBMC data.\n\n")
             md_file.write("![Cell2Cell Interaction](cell2cell_interaction.png)\n\n")
+            md_file.write("![Cell2Cell UMAP Arcs](cci_umap_arcs.png)\n\n")
             md_file.flush()
     except Exception as e:
         print(f"Interaction analysis skipped: {e}")

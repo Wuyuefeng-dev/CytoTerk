@@ -23,6 +23,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+# Add src to Python Path to ensure local module resolution
+import sys
+sys.path.append('src')
+
 # Import scCytoTrek modules
 import sccytotrek as ct
 
@@ -144,19 +148,66 @@ We can dynamically calculate transcription factor enrichments using synthetic or
 """
 
 code_grn = """\
-valid_genes = adata.var_names[:5].tolist()
-if len(valid_genes) >= 4:
-    tf_df = pd.DataFrame({
-        'tf': [valid_genes[0], valid_genes[0], valid_genes[1], valid_genes[1]],
-        'target': [valid_genes[2], valid_genes[3], valid_genes[2], valid_genes[3]],
-        'weight': [1.0, 0.8, -0.5, 0.9]
-    })
+tf_pairs_list = [
+    ('SPI1', 'LYZ', 1.0),
+    ('SPI1', 'CD14', 0.8),
+    ('STAT1', 'ISG15', 1.0),
+    ('STAT1', 'CXCL10', 0.9),
+    ('PAX5', 'CD79A', 1.0),
+    ('PAX5', 'MS4A1', 0.8)
+]
+
+valid_pairs = [(tf, tgt, w) for tf, tgt, w in tf_pairs_list if tf in adata.var_names and tgt in adata.var_names]
+if not valid_pairs:
+    valid_genes = adata.var_names[:5].tolist()
+    valid_pairs = [(valid_genes[0], valid_genes[2], 1.0), (valid_genes[0], valid_genes[3], 0.8)]
+
+tfs, tgts, wts = zip(*valid_pairs)
+tf_df = pd.DataFrame({'tf': tfs, 'target': tgts, 'weight': wts})
+
+if len(tf_df) >= 1:
+    primary_tf = tf_df['tf'].iloc[0]
     adata = ct.grn.run_tf_enrichment(adata, tf_network=tf_df, source_col='tf', target_col='target', min_expr_fraction=0.0)
-    sc.pl.umap(adata, color=f"tf_score_{valid_genes[0]}", cmap='viridis', title=f"TF Enrichment: {valid_genes[0]}", show=True)
+    
+    if f"tf_score_{primary_tf}" in adata.obs:
+        sc.pl.umap(adata, color=f"tf_score_{primary_tf}", cmap='viridis', title=f"TF Enrichment: {primary_tf}", show=True)
+"""
+
+text_cci = """\
+## 7. Extracellular Communication (CellPhoneDB Scoring & Cell2Cell Plot)
+
+We evaluate cell-cell communication by running non-parametric label permutations against biologically relevant Ligand-Receptor pairs.
+"""
+
+code_cci = """\
+lr_pairs_list = [
+    ('HLA-DRA', 'CD4'),
+    ('B2M', 'CD3E'),
+    ('CD86', 'CD28'),
+    ('CCL5', 'CCR5'),
+    ('IL32', 'CD4'),
+    ('HLA-DPB1', 'CD4'),
+    ('CD74', 'CD44')
+]
+
+valid_pairs = [(l, r) for l, r in lr_pairs_list if l in adata.var_names and r in adata.var_names]
+
+if valid_pairs:
+    ligands, receptors = zip(*valid_pairs)
+    lr_df = pd.DataFrame({'ligand': ligands, 'receptor': receptors})
+    
+    ccc_res = ct.interaction.run_cellphonedb_scoring(adata, lr_pairs=lr_df, group_key='leiden_0.5', n_perms=100)
+    if not ccc_res.empty:
+        fig = ct.interaction.plot_cell2cell_dotplot(ccc_res, top_n=20)
+        # Adding UMAP Arc plotting 
+        try:
+            ct.interaction.plot_cell2cell_umap(adata, ccc_res, group_key='leiden_0.5', top_n=10, save=os.path.join(fig_dir, "cci_umap_arcs.png"), show=True)
+        except Exception as e:
+            print(f"Arc plot failed: {e}")
 """
 
 text_fin = """\
-## 7. Differential Expression
+## 8. Differential Expression
 
 We perform Dropout-Adjusted DE across major cell clusters.
 """
@@ -189,6 +240,8 @@ nb['cells'] = [
     nbf.v4.new_code_cell(code_traj),
     nbf.v4.new_markdown_cell(text_grn),
     nbf.v4.new_code_cell(code_grn),
+    nbf.v4.new_markdown_cell(text_cci),
+    nbf.v4.new_code_cell(code_cci),
     nbf.v4.new_markdown_cell(text_fin),
     nbf.v4.new_code_cell(code_fin),
 ]

@@ -275,9 +275,11 @@ Differentiation is rarely instantaneous. Trajectories establish macroscopic cell
 
 `ct.interaction.run_cellphonedb_scoring` uses non-parametric label permutations to identify cross-cluster ligand-receptor signals. `ct.interaction.plot_cell2cell_dotplot` condenses millions of connections into a targeted dot-plot.
 
+We evaluate extracellular communication by running non-parametric label permutations against biologically relevant immune Ligand-Receptor pairs (e.g., HLA-DRA to CD4, CCL5 to CCR5) on the PBMC data.
+
 ![Receptor Crosslinking Grid](demo_figs/cell2cell_interaction.png)
 
-![Cell-Cell Interaction UMAP Arcs](/Users/yuefengwu/.gemini/antigravity/brain/eb777a4e-aeb2-4e12-86ed-8d817fbf5405/cci_umap_arcs.png)
+![Cell-Cell Interaction UMAP Arcs](demo_figs/cci_umap_arcs.png)
 
 ---
 
@@ -338,9 +340,11 @@ Run: `PYTHONPATH=src python demo_cross_species.py`
 
 **Output:** per-cell TF activity matrix in `adata.obsm['X_tf_activity']`.
 
-| TF Activity Heatmap (Cluster × TF) + Global Ranking |
-| :---: |
-| ![TF Score Ranking](demo_figs/tf_score_ranking.png) |
+| TF Score Heatmap + Ranking | Cluster × TF Dotplot |
+| :---: | :---: |
+| ![TF Score Ranking](demo_figs/tf_score_ranking.png) | ![TF Enrichment Dotplot](demo_figs/tf_enrichment_dotplot.png) |
+
+![SPI1 TF Activity UMAP](demo_figs/tf_enrichment_umap.png)
 
 ---
 
