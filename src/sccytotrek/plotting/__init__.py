@@ -1,4 +1,5 @@
 from .base import dim_plot, feature_plot
+from .volcano import plot_volcano
 
 from .style import (
     apply_seurat_theme,
@@ -15,6 +16,7 @@ from .style import (
 __all__ = [
     "dim_plot",
     "feature_plot",
+    "plot_volcano",
     "apply_seurat_theme",
     "seurat_figure",
     "discrete_colors",

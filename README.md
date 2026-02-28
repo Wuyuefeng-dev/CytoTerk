@@ -249,6 +249,8 @@ Rather than manual curation, `ct.tools.score_cell_types` cross-references a dict
 ### Dropout-Adjusted DE Analysis
 `ct.tools.run_differential_expression` uses a unique Cellular Detection Rate (CDR) linear model to isolate biological signals strictly away from capture-specific sequencer biases.
 
+![Dropout-Adjusted DE Volcano Plot](demo_figs/de_volcano.png)
+
 ---
 
 ## 4. Trajectory Inference & Tipping Points (`sccytotrek.trajectory`)

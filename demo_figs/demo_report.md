@@ -9,7 +9,7 @@ We begin by evaluating total molecular distributions (UMI Depth) to remove empty
 
 ![QC Violins](qc_violins.png)
 
-- **Doublet Detection:** Custom kNN-based doublet finding. Identified and removed 140 doublets.
+- **Doublet Detection:** Custom kNN-based doublet finding. Identified and removed 145 doublets.
   ![Before Doublet Removal](doublets_before.png)
   ![After Doublet Removal](doublets_after.png)
 
@@ -37,6 +37,20 @@ scCytoTrek supports several standard and specialized clustering algorithms. Belo
 - **Working Situation:** Ideal for smaller scRNA-seq datasets or bulk RNA-seq where establishing an evolutionary or developmental relationship between the populations is critical.
 
 ![Agglomerative](agglomerative_clusters.png)
+
+### 3. Spectral Clustering
+- **Pros:** Excellent at identifying non-convex, arbitrarily shaped clusters. Mathematically similar to graph-based approaches like Louvain.
+- **Cons:** Computationally expensive due to eigenvalue decomposition. Can be sensitive to the choice of affinity matrix parameters.
+- **Working Situation:** Useful when cells form dense topological manifolds that are non-globular, such as interconnected developmental branches where standard K-Means fails.
+
+![Spectral](spectral_clusters.png)
+
+### 4. Gaussian Mixture Models (GMM)
+- **Pros:** Provides soft assignments (probabilities) for cell membership, reflecting biological ambiguity. Can model clusters with different variances.
+- **Cons:** Prone to local maxima. Can be unstable in highly dimensional spaces if not sufficiently reduced via PCA.
+- **Working Situation:** Excellent for modeling transitional states in continuous differentiation processes where a cell might partially belong to two distinct states.
+
+![GMM](gmm_clusters.png)
 
 ### 5. DBSCAN (Density-Based)
 - **Pros:** Does not force every cell into a cluster (can robustly identify noise/outliers). Excellent at finding clusters of arbitrary shape based on local density.
@@ -78,10 +92,12 @@ Assigned cell types based on simple gene module scoring of known markers over cl
 ![Cell Types](cell_types.png)
 
 ## 5. Differential Expression
-Conducted Dropout-Adjusted Differential Expression between `1` and `0`. Results outputted to `differential_expression.csv`.
+Conducted Dropout-Adjusted Differential Expression between `0` and `1`. Results outputted to `differential_expression.csv`.
+
+![Volcano Plot](de_volcano.png)
 
 ## 7. Trajectory Inference & Sandpile Entropy
-Computed trajectory and Sandpile Network Entropy. Tipping point found at bin 19 with entropy 3.154.
+Computed trajectory and Sandpile Network Entropy. Tipping point found at bin 19 with entropy 3.005.
 
 ![Sandpile Entropy Line Graph](sandpile_entropy_trajectory.png)
 

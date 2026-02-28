@@ -221,6 +221,15 @@ if len(groups) >= 2:
             out_csv=os.path.join(fig_dir, "differential_expression_pbmc3k.csv")
         )
         print(f"Differentially expressed genes between {groups[0]} and {groups[1]} extracted successfully.")
+        
+        if not de_res.empty:
+            ct.plotting.plot_volcano(
+                de_res, 
+                title=f"Volcano: {groups[0]} vs {groups[1]}",
+                lfc_thresh=1.0, 
+                pval_thresh=0.05,
+                show=True
+            )
     except Exception as e:
         print(f"DE skipped: {e}")
 """

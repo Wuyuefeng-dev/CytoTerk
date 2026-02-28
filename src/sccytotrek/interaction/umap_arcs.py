@@ -114,10 +114,19 @@ def plot_cell2cell_umap(
     centroids = {cl: emb[cl_vals == cl].mean(0) for cl in unique_cl}
 
     # ── Assign colours by source cluster ───────────────────────────────────
-    cl_color = {
-        cl: SEURAT_DISCRETE[i % len(SEURAT_DISCRETE)]
-        for i, cl in enumerate(unique_cl)
-    }
+    cl_color = {}
+    if f"{groupby}_colors" in adata.uns:
+        # Respect existing Scanpy colors
+        colors = adata.uns[f"{groupby}_colors"]
+        if hasattr(adata.obs[groupby], "cat"):
+            cat_order = adata.obs[groupby].cat.categories
+            for idx, c in enumerate(cat_order):
+                cl_color[str(c)] = colors[idx % len(colors)]
+    
+    # Fallback to Seurat Palette
+    for i, cl in enumerate(unique_cl):
+        if cl not in cl_color:
+            cl_color[cl] = SEURAT_DISCRETE[i % len(SEURAT_DISCRETE)]
 
     # ── Normalise line widths ───────────────────────────────────────────────
     s_vals = df["_strength"].values.astype(float)
@@ -131,6 +140,7 @@ def plot_cell2cell_umap(
     # ── Draw ────────────────────────────────────────────────────────────────
     fig, ax = plt.subplots(figsize=(10, 9), facecolor=FIG_BG)
     apply_seurat_theme(ax, spines="none")
+    ax.set_aspect("equal")
 
     # BG scatter — all cells
     for cl in unique_cl:

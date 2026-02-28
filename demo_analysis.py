@@ -161,7 +161,7 @@ def main():
     print("  -> Spectral")
     try:
         adata = ct.clustering.run_spectral(adata, n_clusters=5)
-        fig = ct.plotting.dim_plot(adata, color='hierarchical', title="Hierarchical Clustering", show=False)
+        fig = ct.plotting.dim_plot(adata, color='spectral', title="Spectral Clustering", show=False)
         fig.figure.savefig(os.path.join(fig_dir, "spectral_clusters.png"), bbox_inches='tight', dpi=150)
         plt.close()
         md_file.write("### 3. Spectral Clustering\n")
@@ -177,7 +177,7 @@ def main():
     print("  -> GMM")
     try:
         adata = ct.clustering.run_gmm(adata, n_components=5)
-        fig = ct.plotting.dim_plot(adata, color='optics', title="OPTICS Clustering", show=False)
+        fig = ct.plotting.dim_plot(adata, color='gmm', title="GMM Clustering", show=False)
         fig.figure.savefig(os.path.join(fig_dir, "gmm_clusters.png"), bbox_inches='tight', dpi=150)
         plt.close()
         md_file.write("### 4. Gaussian Mixture Models (GMM)\n")
@@ -324,8 +324,21 @@ def main():
                 out_csv=os.path.join(fig_dir, "differential_expression.csv")
             )
             print("Successfully extracted differentially expressed genes.")
+            
+            if not de_res.empty:
+                # Generate Volcano Plot
+                fig = ct.plotting.plot_volcano(
+                    de_res, 
+                    title=f"Volcano: {groups[0]} vs {groups[1]}",
+                    lfc_thresh=1.0, 
+                    pval_thresh=0.05,
+                    show=False,
+                    save=os.path.join(fig_dir, "de_volcano.png")
+                )
+            
             md_file.write(f"Conducted Dropout-Adjusted Differential Expression between `{groups[0]}` and `{groups[1]}`. ")
             md_file.write("Results outputted to `differential_expression.csv`.\n\n")
+            md_file.write("![Volcano Plot](de_volcano.png)\n\n")
         except Exception as e:
             print(f"DE skipped: {e}")
             md_file.write(f"> Differential Expression failed/skipped: {e}\n\n")
